@@ -81,17 +81,19 @@
         <a-card title="镜头提示词" :bordered="false" size="small" style="margin-bottom: 12px" v-if="mockStoryboard.prompt">
           {{ mockStoryboard.prompt }}
         </a-card>
-        <a-card title="视频提示词" :bordered="false" size="small" style="margin-bottom: 12px" v-if="mockStoryboard.videoPrompt">
-          {{ mockStoryboard.videoPrompt }}
-        </a-card>
-        <a-card title="人物对话" :bordered="false" size="small" style="margin-bottom: 12px" v-if="mockStoryboard.dialogue">
+        <a-card title="视频提示词" :bordered="false" size="small" style="margin-bottom: 12px">
           <a-typography-paragraph style="margin-bottom: 0; white-space: pre-wrap">
-            {{ mockStoryboard.dialogue }}
+            {{ mockStoryboard.videoPrompt || "暂无" }}
           </a-typography-paragraph>
         </a-card>
-        <a-card title="第三方视角叙述" :bordered="false" size="small" style="margin-bottom: 20px" v-if="mockStoryboard.narration">
+        <a-card title="人物对话" :bordered="false" size="small" style="margin-bottom: 12px">
           <a-typography-paragraph style="margin-bottom: 0; white-space: pre-wrap">
-            {{ mockStoryboard.narration }}
+            {{ mockStoryboard.dialogue || "暂无" }}
+          </a-typography-paragraph>
+        </a-card>
+        <a-card title="第三方视角叙述" :bordered="false" size="small" style="margin-bottom: 20px">
+          <a-typography-paragraph style="margin-bottom: 0; white-space: pre-wrap">
+            {{ mockStoryboard.narration || "暂无" }}
           </a-typography-paragraph>
         </a-card>
         <a-card title="生成结果" :bordered="false" size="small">

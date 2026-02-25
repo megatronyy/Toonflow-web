@@ -196,6 +196,26 @@
                   </a-button>
                 </div>
               </div>
+              <!-- 人物对话（生成视频时会一并传入） -->
+              <div class="formRow promptRow">
+                <label>人物对话</label>
+                <a-textarea
+                  v-model:value="config.dialogue"
+                  :rows="1"
+                  placeholder="角色名：台词，无则留空"
+                  size="small"
+                  style="width: 100%" />
+              </div>
+              <!-- 第三方视角叙述（生成视频时会一并传入） -->
+              <div class="formRow promptRow">
+                <label>第三方叙述</label>
+                <a-textarea
+                  v-model:value="config.narration"
+                  :rows="1"
+                  placeholder="第三人称叙述，无则留空"
+                  size="small"
+                  style="width: 100%" />
+              </div>
             </div>
           </div>
         </div>
@@ -256,6 +276,10 @@
                 <span class="duration">{{ item.duration || 0 }}s</span>
               </div>
               <div class="storyboardPrompt">视频提示词：{{ item.videoPrompt || "暂无" }}</div>
+              <div class="storyboardExtra" v-if="item.dialogue || item.narration">
+                <div v-if="item.dialogue" class="storyboardLine">人物对话：{{ item.dialogue }}</div>
+                <div v-if="item.narration" class="storyboardLine">第三方叙述：{{ item.narration }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -307,6 +331,8 @@ interface VideoConfig {
   resolution: string;
   duration: number;
   prompt: string;
+  dialogue: string;
+  narration: string;
   promptLoading: boolean;
   audioEnabled: boolean;
 }
@@ -318,6 +344,8 @@ interface StoryboardImportItem {
   prompt: string;
   videoPrompt: string;
   duration: number;
+  dialogue: string;
+  narration: string;
 }
 interface Storyboard {
   id: number;
@@ -388,6 +416,8 @@ function createBaseVideoConfig(): VideoConfig {
     resolution: getDefaultResolution(defaultManufacturer, defaultModel),
     duration: getDefaultDuration(defaultManufacturer, defaultModel),
     prompt: "",
+    dialogue: "",
+    narration: "",
     promptLoading: false,
     audioEnabled: false,
   };
@@ -571,6 +601,8 @@ async function openImportFromStoryboard() {
       prompt: item.prompt ?? "",
       videoPrompt: item.videoPrompt ?? "",
       duration: Number(item.duration) || 0,
+      dialogue: item.dialogue ?? "",
+      narration: item.narration ?? "",
     }));
     if (!storyboardImportList.value.length) {
       message.warning("当前剧本暂无分镜，请先在资产管理中生成分镜");
@@ -610,6 +642,8 @@ function confirmImportStoryboards() {
     base.mode = targetMode;
     base.duration = item.duration || getDefaultDuration(defaultManufacturer, defaultModel);
     base.prompt = item.videoPrompt || "";
+    base.dialogue = item.dialogue ?? "";
+    base.narration = item.narration ?? "";
     const image: ImageItem = {
       id: item.id,
       filePath: item.filePath,
@@ -666,6 +700,8 @@ async function handleOk() {
         resolution: config.resolution,
         duration: config.duration,
         prompt: config.prompt,
+        dialogue: config.dialogue ?? "",
+        narration: config.narration ?? "",
         audioEnabled: config.audioEnabled,
       });
 
@@ -1005,6 +1041,18 @@ function handleCancel() {
       color: #666;
       max-height: 48px;
       overflow: hidden;
+    }
+    .storyboardExtra {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #888;
+      .storyboardLine {
+        margin-top: 2px;
+        max-height: 36px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 }
