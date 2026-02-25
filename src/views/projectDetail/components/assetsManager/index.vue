@@ -142,6 +142,17 @@
               </template>
             </vxe-column>
 
+            <vxe-column
+              v-if="currentFilter === 'role'"
+              title="音色"
+              field="voiceId"
+              width="140"
+              show-overflow="title">
+              <template #default="{ row }">
+                <p class="remark-text">{{ row.voiceId || "-" }}</p>
+              </template>
+            </vxe-column>
+
             <vxe-column v-if="currentFilter === 'storyboard'" title="视频提示词" field="videoPrompt" min-width="200" show-overflow="title">
               <template #default="{ row }">
                 <template v-if="props.batch">
@@ -152,6 +163,28 @@
                     class="prompt-textarea" />
                 </template>
                 <p v-else class="prompt-text">{{ row.videoPrompt || "暂无提示词" }}</p>
+              </template>
+            </vxe-column>
+
+            <vxe-column
+              v-if="currentFilter === 'storyboard'"
+              title="人物对话"
+              field="dialogue"
+              min-width="180"
+              show-overflow="title">
+              <template #default="{ row }">
+                <p class="remark-text">{{ row.dialogue || "-" }}</p>
+              </template>
+            </vxe-column>
+
+            <vxe-column
+              v-if="currentFilter === 'storyboard'"
+              title="第三方叙述"
+              field="narration"
+              min-width="200"
+              show-overflow="title">
+              <template #default="{ row }">
+                <p class="remark-text">{{ row.narration || "-" }}</p>
               </template>
             </vxe-column>
 
@@ -227,6 +260,9 @@ interface ElementData {
   duration: number;
   type: string;
   videoPrompt: string;
+  dialogue?: string;
+  narration?: string;
+  voiceId?: string;
 }
 
 interface ScriptItem {
@@ -388,6 +424,9 @@ async function handleBatchSave(list: ElementData[]) {
       remark: item.remark ?? "",
       prompt: item.prompt,
       duration: Number(item.duration),
+      videoPrompt: item.videoPrompt,
+      dialogue: item.dialogue ?? "",
+      narration: item.narration ?? "",
     });
     await axios.post("/assets/saveAssets", {
       id: item.id,

@@ -12,10 +12,15 @@
       <div class="configPanel">
         <div class="configHeader">
           <h3>视频生成配置</h3>
-          <a-button type="primary" @click="addVideoConfig">
-            <plus-outlined />
-            添加配置
-          </a-button>
+          <div class="configHeaderActions">
+            <a-button style="margin-right: 8px" @click="openImportFromStoryboard">
+              一键导入分镜
+            </a-button>
+            <a-button type="primary" @click="addVideoConfig">
+              <plus-outlined />
+              添加配置
+            </a-button>
+          </div>
         </div>
         <!-- 视频配置列表 Grid 布局 -->
         <div class="configList" v-if="videoConfigs.length > 0">
@@ -222,6 +227,41 @@
         </div>
       </template>
     </a-modal>
+    <!-- 一键从分镜导入配置弹窗 -->
+    <a-modal
+      v-model:open="importStoryboardVisible"
+      title="从分镜一键导入视频配置"
+      width="80%"
+      @ok="confirmImportStoryboards"
+      @cancel="importStoryboardVisible = false">
+      <a-spin :spinning="importStoryboardLoading">
+        <div v-if="storyboardImportList.length" class="storyboardImportBody">
+          <p class="importTip">
+            请选择需要导入的视频分镜（可多选），每个分镜将生成一条对应的视频配置。
+          </p>
+          <div class="storyboardGrid">
+            <div v-for="(item, index) in storyboardImportList" :key="item.id" class="storyboardItem">
+              <a-checkbox
+                :checked="storyboardSelectedIds.includes(item.id)"
+                @change="onToggleStoryboard(item.id, $event.target.checked)">
+                第 {{ index + 1 }} 镜：{{ item.name || "未命名" }}
+              </a-checkbox>
+              <a-image
+                :src="item.filePath"
+                :width="160"
+                :height="90"
+                style="border-radius: 6px; margin-top: 8px"
+                :preview="false" />
+              <div class="storyboardMeta">
+                <span class="duration">{{ item.duration || 0 }}s</span>
+              </div>
+              <div class="storyboardPrompt">视频提示词：{{ item.videoPrompt || "暂无" }}</div>
+            </div>
+          </div>
+        </div>
+        <a-empty v-else description="当前剧本暂无分镜，请先在资产管理中生成分镜" />
+      </a-spin>
+    </a-modal>
   </div>
 </template>
 
@@ -270,6 +310,15 @@ interface VideoConfig {
   promptLoading: boolean;
   audioEnabled: boolean;
 }
+
+interface StoryboardImportItem {
+  id: number;
+  name: string;
+  filePath: string;
+  prompt: string;
+  videoPrompt: string;
+  duration: number;
+}
 interface Storyboard {
   id: number;
   name: string;
@@ -298,6 +347,11 @@ const availableManufacturers = computed(() => {
   if (manufacturerList.value.length === 0) return [];
   return manufacturerList.value.map((i) => ({ label: i.model + manufacturerAllRecord[i.manufacturer], value: i.id, manufacturer: i.manufacturer }));
 });
+
+const importStoryboardVisible = ref(false);
+const importStoryboardLoading = ref(false);
+const storyboardImportList = ref<StoryboardImportItem[]>([]);
+const storyboardSelectedIds = ref<number[]>([]);
 onMounted(async () => {
   const res = await axios.post("/video/getManufacturer", {
     userId: Number(localStorage.getItem("userId")),
@@ -312,13 +366,17 @@ watch(storyboardShow, (v) => {
   }
 });
 
-function addVideoConfig() {
+function getDefaultManufacturerAndModel() {
   const defaultManufacturer: string = availableManufacturers.value[0]?.manufacturer || "volcengine";
   const defaultModel: string = availableManufacturers.value[0]
     ? manufacturerList.value.find((i) => i.id === availableManufacturers.value[0].value)?.model || ""
     : "";
+  return { defaultManufacturer, defaultModel };
+}
 
-  const newConfig: VideoConfig = {
+function createBaseVideoConfig(): VideoConfig {
+  const { defaultManufacturer, defaultModel } = getDefaultManufacturerAndModel();
+  return {
     id: ++configIdCounter,
     configId: undefined,
     manufacturer: "",
@@ -333,6 +391,10 @@ function addVideoConfig() {
     promptLoading: false,
     audioEnabled: false,
   };
+}
+
+function addVideoConfig() {
+  const newConfig: VideoConfig = createBaseVideoConfig();
   videoConfigs.value.push(newConfig);
 }
 function removeVideoConfig(index: number) {
@@ -483,6 +545,86 @@ async function generateConfigPrompt(config: VideoConfig) {
     config.promptLoading = false;
   }
 }
+
+async function openImportFromStoryboard() {
+  const scriptIdToUse = props.scriptId || currentScriptId.value;
+  if (!scriptIdToUse) {
+    message.warning("请先选择剧本，再一键导入分镜");
+    return;
+  }
+  if (!project.value?.id) {
+    message.error("项目不存在");
+    return;
+  }
+  importStoryboardLoading.value = true;
+  storyboardSelectedIds.value = [];
+  try {
+    const res = await axios.post("/storyboard/getStoryboard", {
+      projectId: Number(project.value.id),
+      scriptId: Number(scriptIdToUse),
+    });
+    const list = (res.data || []) as any[];
+    storyboardImportList.value = list.map((item) => ({
+      id: item.id,
+      name: item.name,
+      filePath: item.filePath,
+      prompt: item.prompt ?? "",
+      videoPrompt: item.videoPrompt ?? "",
+      duration: Number(item.duration) || 0,
+    }));
+    if (!storyboardImportList.value.length) {
+      message.warning("当前剧本暂无分镜，请先在资产管理中生成分镜");
+      return;
+    }
+    importStoryboardVisible.value = true;
+  } catch (e: any) {
+    message.error(e?.message || "获取分镜失败");
+  } finally {
+    importStoryboardLoading.value = false;
+  }
+}
+
+function onToggleStoryboard(id: number, checked: boolean) {
+  if (checked) {
+    if (!storyboardSelectedIds.value.includes(id)) {
+      storyboardSelectedIds.value.push(id);
+    }
+  } else {
+    storyboardSelectedIds.value = storyboardSelectedIds.value.filter((v) => v !== id);
+  }
+}
+
+function confirmImportStoryboards() {
+  if (!storyboardSelectedIds.value.length) {
+    message.warning("请选择至少一条分镜");
+    return;
+  }
+  const { defaultManufacturer, defaultModel } = getDefaultManufacturerAndModel();
+  const modeOptions = getModeOptions(defaultManufacturer, defaultModel);
+  const supportSingle = modeOptions.some((m) => m.value === "single");
+  const targetMode: VideoConfig["mode"] = supportSingle ? "single" : "multi";
+
+  const selected = storyboardImportList.value.filter((item) => storyboardSelectedIds.value.includes(item.id));
+  selected.forEach((item) => {
+    const base = createBaseVideoConfig();
+    base.mode = targetMode;
+    base.duration = item.duration || getDefaultDuration(defaultManufacturer, defaultModel);
+    base.prompt = item.videoPrompt || "";
+    const image: ImageItem = {
+      id: item.id,
+      filePath: item.filePath,
+      prompt: item.prompt || "",
+    };
+    if (targetMode === "single") {
+      base.startFrame = image;
+    } else {
+      base.images = [image];
+    }
+    videoConfigs.value.push(base);
+  });
+  message.success(`已根据选中分镜生成 ${selected.length} 条视频配置`);
+  importStoryboardVisible.value = false;
+}
 async function handleOk() {
   if (videoConfigs.value.length === 0) {
     message.warning("请至少添加一个视频配置");
@@ -562,6 +704,10 @@ function handleCancel() {
       margin: 0;
       font-size: 16px;
       font-weight: 600;
+    }
+    .configHeaderActions {
+      display: flex;
+      align-items: center;
     }
   }
 }
@@ -829,6 +975,37 @@ function handleCancel() {
   .selectedCount {
     color: #1890ff;
     font-weight: 500;
+  }
+}
+
+.storyboardImportBody {
+  .importTip {
+    margin-bottom: 12px;
+    color: #666;
+    font-size: 13px;
+  }
+  .storyboardGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .storyboardItem {
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
+    .storyboardMeta {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #888;
+    }
+    .storyboardPrompt {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #666;
+      max-height: 48px;
+      overflow: hidden;
+    }
   }
 }
 

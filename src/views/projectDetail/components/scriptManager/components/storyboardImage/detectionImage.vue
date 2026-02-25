@@ -99,6 +99,15 @@
               </template>
             </vxe-column>
 
+            <!-- 人物对话 -->
+            <vxe-column field="dialogue" title="人物对话" min-width="180" :edit-render="{ name: 'input' }">
+              <template #default="{ row }">
+                <div class="prompt-cell">
+                  <span class="prompt-text" :title="row.dialogue">{{ row.dialogue || "-" }}</span>
+                </div>
+              </template>
+            </vxe-column>
+
             <!-- 时长 -->
             <vxe-column field="duration" title="时长(秒)" width="100" align="center">
               <template #default="{ row }">
@@ -150,6 +159,7 @@ type ImageDataItem = {
   segmentId: number;
   shotIndex: number;
   src: string;
+  dialogue?: string;
   dataUrl?: string;
   superScoreLoading?: boolean;
   videoPromptLoading?: boolean;
@@ -221,6 +231,7 @@ function updateRowsByIds(responseData: any[], statusKey: "isSuperScored" | "isVi
       if (updated.type !== undefined) row.type = updated.type;
       if (updated.name !== undefined) row.name = updated.name;
       if (updated.src !== undefined) row.src = updated.src;
+      if (updated.dialogue !== undefined) row.dialogue = updated.dialogue;
       row[statusKey] = true;
     }
   });
@@ -368,6 +379,7 @@ function handleOk() {
         scriptId: item.scriptId,
         segmentId: item.segmentId,
         shotIndex: item.shotIndex,
+        dialogue: item.dialogue ?? "",
       })),
     })
     .then(() => {
