@@ -35,7 +35,7 @@
           <div class="frame-box" :class="{ 'has-image': localConfig.startFrame }" @click="openSelector('start')">
             <template v-if="localConfig.startFrame">
               <img :src="localConfig.startFrame.filePath" />
-              <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="localConfig.startFrame = null">
+              <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="removeStartFrame">
                 <close-outlined />
               </a-button>
               <span class="frame-label">首帧</span>
@@ -48,7 +48,7 @@
           <div class="frame-box" :class="{ 'has-image': localConfig.endFrame }" @click="openSelector('end')">
             <template v-if="localConfig.endFrame">
               <img :src="localConfig.endFrame.filePath" />
-              <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="localConfig.endFrame = null">
+              <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="removeEndFrame">
                 <close-outlined />
               </a-button>
               <span class="frame-label">尾帧</span>
@@ -82,7 +82,7 @@
                   <img class="image" :src="element.filePath" draggable="false" />
                   <div class="image-order">{{ imgIndex + 1 }}</div>
                 </div>
-                <a-button v-if="editable" class="remove-btn" type="text" size="small" @click="removeImage(imgIndex)">
+                <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="removeImage(imgIndex)">
                   <close-outlined />
                 </a-button>
               </div>
@@ -112,7 +112,7 @@
           <div class="frame-box single-frame" :class="{ 'has-image': localConfig.startFrame }" @click="openSelector('single')">
             <template v-if="localConfig.startFrame">
               <img :src="localConfig.startFrame.filePath" />
-              <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="localConfig.startFrame = null">
+              <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="removeStartFrame">
                 <close-outlined />
               </a-button>
             </template>
@@ -225,6 +225,7 @@ import {
   getDurationTip,
   getMaxImages,
   getAudioSupport,
+  getModelList
 } from "./manufacturerConfig";
 
 const props = withDefaults(
@@ -241,7 +242,7 @@ const props = withDefaults(
     availableManufacturers: () => [
       { label: "火山引擎(豆包)", value: "volcengine" },
       { label: "RunningHub(Sora)", value: "runninghub" },
-      { label: "Apimart(Sora)", value: "apimart" },
+      // { label: "Apimart(Sora)", value: "apimart" },
     ],
   },
 );
@@ -354,6 +355,18 @@ function removeImage(index: number) {
   emitChange();
 }
 
+// 移除首帧并通知外部
+function removeStartFrame() {
+  localConfig.startFrame = null;
+  emitChange();
+}
+
+// 移除尾帧并通知外部
+function removeEndFrame() {
+  localConfig.endFrame = null;
+  emitChange();
+}
+
 // 生成提示词
 async function generatePrompt() {
   const images: ImageItem[] = [];
@@ -403,6 +416,7 @@ const manufacturerAllRecord: Record<string, string> = Object.values(manufacturer
 }, {});
 const availableManufacturers = computed(() => {
   if (manufacturerList.value.length === 0) return [];
+
   return manufacturerList.value.map((i) => ({
     label: i.model + "—" + manufacturerAllRecord[i.manufacturer],
     value: i.id,
@@ -427,6 +441,9 @@ onMounted(async () => {
     }
   }
 });
+onMounted(() =>{
+  getModelList()
+})
 </script>
 
 <style lang="scss" scoped>

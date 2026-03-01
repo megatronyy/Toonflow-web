@@ -219,7 +219,7 @@ export default defineStore(
         createdAt: configData.createdAt || new Date().toISOString(),
         audioEnabled: configData.audioEnabled,
       };
-      videoConfigs.value.push(newConfig);
+      videoConfigs.value.unshift(newConfig);
 
       // 更新configIdCounter
       if (newConfig.id > configIdCounter) {
@@ -286,7 +286,6 @@ export default defineStore(
       } else {
         config.images.forEach((img) => videoImgs.push(img.filePath));
       }
-
       // 调用后端接口
       const { data } = await axios.post("/video/generateVideo", {
         projectId: config.projectId,
@@ -349,7 +348,10 @@ export default defineStore(
         >
       >,
     ) {
+      console.log("%c Line:338 🍐 updates", "background:#465975", updates);
+
       const config = videoConfigs.value.find((c) => c.id === configId);
+      console.log("%c Line:342 🌰 config", "background:#fca650", config);
       if (config) {
         if (updates.prompt !== undefined) config.prompt = updates.prompt;
         if (updates.resolution !== undefined) config.resolution = updates.resolution;

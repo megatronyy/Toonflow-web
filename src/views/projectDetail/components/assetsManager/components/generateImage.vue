@@ -113,6 +113,9 @@
                       <div class="resultOverlay">
                         <i-preview-open class="previewBtn" theme="outline" size="20" fill="#fff" @click.stop="previewImage(item.filePath)" />
                       </div>
+                      <div class="del">
+                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" fill="#d0021b" @click.stop="delImage(item)" />
+                      </div>
                       <div v-if="selectedIndex === index" class="selectedBadge">
                         <i-check theme="outline" size="14" fill="#fff" />
                       </div>
@@ -122,9 +125,21 @@
                         <a-spin />
                         <span>生成中...</span>
                       </div>
+                      <div class="del">
+                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" fill="#d0021b" @click.stop="delImage(item)" />
+                      </div>
+                    </template>
+                    <template v-else-if="item.state === '生成失败'">
+                      <div class="errorPlaceholder">生成失败</div>
+                      <div class="del">
+                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" fill="#d0021b" @click.stop="delImage(item)" />
+                      </div>
                     </template>
                     <template v-else>
                       <div class="errorPlaceholder">未知状态</div>
+                      <div class="del">
+                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" fill="#d0021b" @click.stop="delImage(item)" />
+                      </div>
                     </template>
                   </div>
                 </div>
@@ -152,7 +167,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { Empty, message } from "ant-design-vue";
+import { Empty, message, Modal } from "ant-design-vue";
 import { useFileDialog } from "@vueuse/core";
 import errorPictrue from "@/utils/error";
 import axios from "@/utils/axios";
@@ -160,6 +175,7 @@ import store from "@/stores";
 const { projectId } = storeToRefs(store());
 
 interface ImageState {
+  id?: number;
   filePath: string;
   state: string;
 }
@@ -209,13 +225,14 @@ const assetType = computed(() => TYPE_MAP[formData.value?.type ?? "道具"] ?? "
 
 // 文件选择
 const { open, onChange, onCancel } = useFileDialog({ multiple: false, reset: true, accept: ".png,.jpg,.jpeg" });
-
+const isFirstLoad = ref(true);
 // 监听弹窗打开
 watch(modalShow, (visible) => {
   if (visible && props.data) {
     formData.value = { ...props.data, sampleImage: "", uploadImage: "" };
+    isFirstLoad.value = true; // 重置首次加载标志
     fetchImages(props.data.id);
-    // 重置加载状态，确保每次打开弹窗时状态独立
+    // 重置加载状态,确保每次打开弹窗时状态独立
     promptLoading.value = false;
     generateLoading.value = false;
   }
@@ -235,9 +252,11 @@ function setPreviewVisible(value: boolean) {
 }
 let timer: number = -1;
 // 获取图片列表
+const assetsId = ref();
 async function fetchImages(id: number) {
   const _id = id;
   const { data } = await axios.post("/assets/getImage", { assetsId: id });
+  assetsId.value = data.id;
   if (data.tempAssets.filter((i: { state: string }) => i.state == "生成中").length > 0) {
     timer = setTimeout(() => {
       if (modalShow.value) fetchImages(_id);
@@ -246,10 +265,18 @@ async function fetchImages(id: number) {
   if (_id == formData.value?.id) {
     if (data.filePath.length > 0) {
       resultImages.value = [{ filePath: data.filePath, state: "生成成功" }, ...data.tempAssets];
-      selectedIndex.value = resultImages.value.findIndex((item) => item.filePath === formData.value?.filePath);
+      if (isFirstLoad.value) {
+        selectedIndex.value = resultImages.value.findIndex((item) => item.filePath === formData.value?.filePath);
+        isFirstLoad.value = false;
+      }
     } else {
       resultImages.value = [...data.tempAssets];
-      selectedIndex.value = resultImages.value.findIndex((item) => item.filePath === formData.value?.filePath && formData.value?.filePath.length > 0);
+      if (isFirstLoad.value) {
+        selectedIndex.value = resultImages.value.findIndex(
+          (item) => item.filePath === formData.value?.filePath && formData.value?.filePath.length > 0,
+        );
+        isFirstLoad.value = false;
+      }
     }
   }
 }
@@ -290,6 +317,32 @@ function previewImage(url: string) {
   previewVisible.value = true;
 }
 
+//删除图片
+async function delImage(item: ImageState) {
+  Modal.confirm({
+    title: "确认删除",
+    content: `确定要删除该图片吗？`,
+    okText: "删除",
+    cancelText: "取消",
+    okButtonProps: { danger: true },
+    onOk: async () => {
+      if (item.id) {
+        await axios.post("/assets/delAssetsImage", {
+          imageId: item.id,
+        });
+      } else {
+        await axios.post("/assets/delAssetsImage", {
+          assetsId: assetsId.value,
+        });
+      }
+      if (props.data?.id) {
+        fetchImages(props.data.id);
+      }
+      message.success("删除成功");
+    },
+  });
+}
+
 // 关闭弹窗
 function close() {
   modalShow.value = false;
@@ -299,7 +352,6 @@ function close() {
 async function generatePrompt() {
   if (!formData.value) return;
   const { id, name, intro, type } = formData.value;
-
   promptLoading.value = true;
   try {
     const { data } = await axios.post("/assets/polishPrompt", {
@@ -307,7 +359,7 @@ async function generatePrompt() {
       assetsId: id,
       type: TYPE_MAP[type ?? "道具"] ?? "props",
       name,
-      describe: intro,
+      describe: intro ? intro : "无描述",
     });
     message.success("提示词生成成功");
     if (data.assetsId === formData.value.id) {
@@ -324,7 +376,6 @@ async function generatePrompt() {
 async function startGenerate() {
   if (!formData.value) return;
   const { id, name, sampleImage, prompt } = formData.value;
-  console.log("%c Line:327 🍖 formData.value", "background:#33a5ff", formData.value);
   fakeLoading.value = true;
   generateLoading.value = true;
   try {
@@ -754,6 +805,12 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
           background: rgba(255, 255, 255, 0.3);
         }
       }
+    }
+    .del {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      cursor: pointer;
     }
 
     .selectedBadge {

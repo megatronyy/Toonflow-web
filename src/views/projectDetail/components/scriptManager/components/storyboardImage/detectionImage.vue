@@ -140,7 +140,7 @@
           </div>
           <div class="footer-actions">
             <a-button @click="detectionImageShow = false">取消</a-button>
-            <a-button type="primary" @click="handleOk">保存并导出</a-button>
+            <a-button type="primary" @click="handleOk" :loading="loadingBtn">保存并导出</a-button>
           </div>
         </div>
       </template>
@@ -384,8 +384,10 @@ async function handleBatchGeneratePrompts() {
     antMessage.warning(`成功 ${successCount} 条，失败 ${failedCount} 条`);
   }
 }
-
+const loadingBtn = ref(false);
 function handleOk() {
+  loadingBtn.value = true;
+
   axios
     .post("/storyboard/keepStoryboard", {
       results: imageData.value?.map((item) => ({
@@ -413,6 +415,7 @@ function handleOk() {
     .finally(() => {
       detectionImageShow.value = false;
       modalShow.value = false;
+      loadingBtn.value = false;
     });
 }
 </script>

@@ -19,17 +19,6 @@
       </div>
     </div>
 
-    <!-- 视觉风格选择（影响资产生成与分镜图风格统一） -->
-    <div class="visual-style-bar">
-      <span class="visual-style-label">视觉风格</span>
-      <a-radio-group
-        v-model:value="visualStyleValue"
-        option-type="button"
-        size="small"
-        :options="visualStyleOptions"
-        @change="onVisualStyleChange" />
-    </div>
-
     <!-- 工具栏 -->
     <div class="toolbar">
       <div class="tab-group" v-if="!props.radio">
@@ -153,17 +142,6 @@
               </template>
             </vxe-column>
 
-            <vxe-column
-              v-if="currentFilter === 'role'"
-              title="音色"
-              field="voiceId"
-              width="140"
-              show-overflow="title">
-              <template #default="{ row }">
-                <p class="remark-text">{{ row.voiceId || "-" }}</p>
-              </template>
-            </vxe-column>
-
             <vxe-column v-if="currentFilter === 'storyboard'" title="视频提示词" field="videoPrompt" min-width="200" show-overflow="title">
               <template #default="{ row }">
                 <template v-if="props.batch">
@@ -187,18 +165,6 @@
                 <p class="remark-text">{{ row.dialogue || "-" }}</p>
               </template>
             </vxe-column>
-
-            <vxe-column
-              v-if="currentFilter === 'storyboard'"
-              title="第三方叙述"
-              field="narration"
-              min-width="200"
-              show-overflow="title">
-              <template #default="{ row }">
-                <p class="remark-text">{{ row.narration || "-" }}</p>
-              </template>
-            </vxe-column>
-
             <vxe-column title="备注" field="remark" width="150" :edit-render="{ name: 'textarea' }">
               <template #default="{ row }">
                 <p class="remark-text">{{ row.remark || "-" }}</p>
@@ -258,8 +224,9 @@ import addElementDialog from "./components/addElementDialog.vue";
 import batchGenereate from "./components/batchGenereate.vue";
 import generateImage from "./components/generateImage.vue";
 import store from "@/stores";
-
+import settingStore from "@/stores/setting";
 const { projectId, currentScriptId, project } = storeToRefs(store());
+const { otherSetting } = storeToRefs(settingStore());
 
 interface ElementData {
   id: number;
@@ -272,8 +239,6 @@ interface ElementData {
   type: string;
   videoPrompt: string;
   dialogue?: string;
-  narration?: string;
-  voiceId?: string;
 }
 
 interface ScriptItem {
@@ -327,36 +292,6 @@ const typeToParam = (type: string) => ({ role: "角色", scene: "场景", props:
 
 const currentLabel = computed(() => radioOptions.find((i) => i.value === currentFilter.value)?.label);
 const canAddElement = computed(() => !(scriptList.value.length === 0 && currentFilter.value === "storyboard"));
-
-// 视觉风格：现实 / 漫剧 / 其他（用于资产生成与分镜图风格统一）
-const visualStyleOptions = [
-  { label: "未设置", value: "" },
-  { label: "现实", value: "realistic" },
-  { label: "漫剧", value: "anime" },
-  { label: "其他", value: "other" },
-];
-const visualStyleValue = ref<string>("");
-watch(
-  project,
-  (p) => {
-    const v = (p as { visualStyle?: string } | null)?.visualStyle ?? "";
-    visualStyleValue.value = ["realistic", "anime", "other"].includes(v) ? v : "";
-  },
-  { immediate: true }
-);
-async function onVisualStyleChange() {
-  const v = visualStyleValue.value;
-  try {
-    await axios.post("/project/updateProject", {
-      id: projectId.value,
-      visualStyle: v === "" ? null : v,
-    });
-    await store().setProjectById(projectId.value);
-    message.success("视觉风格已更新，后续生成将按此风格统一");
-  } catch (e: any) {
-    message.error(e?.message ?? "更新失败");
-  }
-}
 
 function getTabIcon(value: string) {
   const icons: Record<string, string> = {
@@ -447,7 +382,8 @@ function deleteFrom(row: ElementData) {
   });
 }
 
-async function processBatch<T>(list: T[], handler: (item: T) => Promise<void>, batchSize = 5) {
+async function processBatch<T>(list: T[], handler: (item: T) => Promise<void>) {
+  const batchSize = otherSetting.value.assetsBatchGenereateSize || 5; // 从设置中获取批量生成的大小，默认为5
   for (let i = 0; i < list.length; i += batchSize) {
     await Promise.all(list.slice(i, i + batchSize).map(handler));
   }
@@ -467,8 +403,6 @@ async function handleBatchSave(list: ElementData[]) {
       duration: Number(item.duration),
       videoPrompt: item.videoPrompt,
       dialogue: item.dialogue ?? "",
-      narration: item.narration ?? "",
-      voiceId: item.voiceId ?? undefined,
     });
     await axios.post("/assets/saveAssets", {
       id: item.id,
@@ -622,30 +556,6 @@ watch(batchShow, (val) => {
           color: #9ca3af;
           margin-top: 2px;
         }
-      }
-    }
-  }
-
-  // 视觉风格栏
-  .visual-style-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #f3f4f6;
-    margin-bottom: 16px;
-
-    .visual-style-label {
-      font-size: 14px;
-      color: #374151;
-      font-weight: 500;
-    }
-
-    :deep(.ant-radio-group) {
-      .ant-radio-button-wrapper {
-        border-radius: 8px;
       }
     }
   }

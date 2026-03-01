@@ -31,6 +31,11 @@
                 <a-tag color="cyan" class="image-tag">图 1</a-tag>
               </div>
             </a-col>
+            <a-col :span="6">
+              <div class="upload-card" @click="lensImage">
+                <i-upload-picture theme="outline" size="36" fill="#9810fa" />
+              </div>
+            </a-col>
           </a-row>
         </a-card>
 
@@ -150,6 +155,7 @@
 </template>
 
 <script setup lang="ts">
+import { useFileDialog } from "@vueuse/core";
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { message } from "ant-design-vue";
@@ -255,6 +261,28 @@ function startPreview(imageUrl: string): void {
   previewImageUrl.value = imageUrl;
   setPreviewVisible(true);
 }
+// 文件选择
+const { open, onChange, onCancel } = useFileDialog({ multiple: false, reset: true, accept: ".png,.jpg,.jpeg" });
+// 文件选择
+async function lensImage() {
+  const files = await new Promise<FileList | null>((resolve) => {
+    open();
+    onChange((f) => resolve(f));
+    onCancel(() => resolve(null));
+  });
+
+  if (!files?.length) return;
+
+  const file = files[0];
+  //转成base64显示
+  const reader = new FileReader();
+  reader.onload = () => {
+    const base64 = reader.result as string;
+    mockStoryboard.value.filePath = base64;
+  };
+  reader.readAsDataURL(file);
+  // mockStoryboard.value.id = -1; // 新上传的图片没有id，使用-1标识，后端根据filePath处理这种情况
+}
 
 async function handleSelectOtherImgs(): Promise<void> {
   selectElementModal.value = true;
@@ -291,7 +319,11 @@ function delResult(index: number): void {
     resultSelectedIndex.value = mockStoryboard.value.generateImg.length - 1;
   }
 }
-
+function isBase64Image(str: string): boolean {
+  // 通用图片类型
+  const reg = /^data:image\/(jpeg|jpg|png|gif|bmp|webp|svg\+xml);base64,/i;
+  return reg.test(str);
+}
 async function doMerge(): Promise<void> {
   generateLoading.value = true;
 
@@ -300,15 +332,16 @@ async function doMerge(): Promise<void> {
     generateLoading.value = false;
     return;
   }
-
   const filePathMap: Record<string, number | string> = {
-    "@图1": mockStoryboard.value.id && mockStoryboard.value.id !== -1 ? mockStoryboard.value.id : mockStoryboard.value.filePath,
+    "@图1":
+      !isBase64Image(mockStoryboard.value.filePath) && mockStoryboard.value.id && mockStoryboard.value.id !== -1
+        ? mockStoryboard.value.id
+        : mockStoryboard.value.filePath,
   };
 
   mockStoryboard.value.otherImgs.forEach((item, idx) => {
     filePathMap[`@图${idx + 2}`] = item.id;
   });
-
   try {
     const res = await axios.post("/storyboard/generateStoryboardApi", {
       filePath: filePathMap,
@@ -340,10 +373,11 @@ function handleSaveFirstFrame(): void {
     message.warning("请先选择一张图片");
     return;
   }
+
   emit("save", {
     id: mockStoryboard.value.id,
     filePath: mockStoryboard.value.generateImg[resultSelectedIndex.value].filePath,
-    prompt: mockStoryboard.value.editPrompt,
+    prompt: mockStoryboard.value.prompt,
   });
   modelValue.value = false;
 }
@@ -389,7 +423,7 @@ defineExpose({
   border: 1px solid #d9d9d9;
   cursor: pointer;
   background: #fafafa;
-
+  text-align: center;
   &:hover {
     border-color: #9913fa;
 

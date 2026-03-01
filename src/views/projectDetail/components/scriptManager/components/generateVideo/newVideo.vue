@@ -119,7 +119,6 @@
                 </div>
                 <div class="formRow">
                   <label></label>
-                  {{ getMaxImages(config.manufacturer, config.model) }}
                   <span class="tip">拖拽调整顺序 | {{ config.images?.length || 0 }}/{{ getMaxImages(config.manufacturer, config.model) }}张</span>
                 </div>
               </template>
@@ -328,6 +327,7 @@ import {
   getDurationTip,
   getMaxImages,
   getAudioSupport,
+  getModelList,
 } from "@/components/videoConfig";
 
 const storeInstance = store();
@@ -370,7 +370,9 @@ interface Storyboard {
   duration: number;
 }
 const props = defineProps<{ scriptId: number }>();
-const storyboardShow = defineModel<boolean>({});
+const storyboardShow = defineModel<boolean>({
+  default: false,
+});
 const generateVideoLoading = ref(false);
 const allManufacturerDisable = ref(false);
 const videoConfigs = ref<VideoConfig[]>([]);
@@ -388,7 +390,7 @@ const manufacturerAllRecord: Record<string, string> = Object.values(manufacturer
 }, {});
 const availableManufacturers = computed(() => {
   if (manufacturerList.value.length === 0) return [];
-  return manufacturerList.value.map((i) => ({ label: i.model + manufacturerAllRecord[i.manufacturer], value: i.id, manufacturer: i.manufacturer }));
+  return manufacturerList.value.map((i) => ({ label: i.model + " " +manufacturerAllRecord[i.manufacturer], value: i.id, manufacturer: i.manufacturer }));
 });
 
 const importStoryboardVisible = ref(false);
@@ -404,6 +406,7 @@ const storyboardsIndeterminate = computed(
     storyboardSelectedIds.value.length < storyboardImportList.value.length
 );
 onMounted(async () => {
+  getModelList();
   const res = await axios.post("/video/getManufacturer", {
     userId: Number(localStorage.getItem("userId")),
   });
@@ -414,6 +417,7 @@ onMounted(async () => {
 watch(storyboardShow, (v) => {
   if (v) {
     videoConfigs.value = [];
+    getModelList();
   }
 });
 

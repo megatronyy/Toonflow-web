@@ -121,6 +121,8 @@ import { message, Modal } from "ant-design-vue";
 import errorPictrue from "@/utils/error";
 import axios from "@/utils/axios";
 import type { CheckboxChangeEvent } from "ant-design-vue/es/checkbox/interface";
+import settingStore from "@/stores/setting";
+const { otherSetting } = storeToRefs(settingStore());
 import store from "@/stores";
 
 const { projectId } = storeToRefs(store());
@@ -245,7 +247,7 @@ async function handleBatchGeneratePrompt() {
 
   promptLoading.value = true;
 
-  const batchSize = 5;
+  const batchSize = otherSetting.value.assetsBatchGenereateSize || 5; // 从设置中获取批量生成的大小，默认为5
   try {
     for (let i = 0; i < list.length; i += batchSize) {
       if (promptGenerateCancel.value) throw new Error("已取消生成");
@@ -292,7 +294,7 @@ async function handleBatchGenerateImage() {
 
   imageLoading.value = true;
 
-  const batchSize = 5;
+  const batchSize = otherSetting.value.assetsBatchGenereateSize || 5; // 从设置中获取批量生成的大小，默认为5
   try {
     for (let i = 0; i < list.length; i += batchSize) {
       const batch = list.slice(i, i + batchSize);
@@ -331,8 +333,8 @@ async function startGenerate(data: { id: number; prompt: string; name: string; t
     if (index !== -1) {
       localData.value[index].filePath = res.data.path;
     }
-  } catch {
-    message.error(`"${data.name}" 图片生成失败`);
+  } catch (e: any) {
+    message.error(`"${data.name}" 图片生成失败: ${e?.message ?? "未知错误"}`);
   } finally {
     rowImageLoading.value[data.id] = false;
   }
