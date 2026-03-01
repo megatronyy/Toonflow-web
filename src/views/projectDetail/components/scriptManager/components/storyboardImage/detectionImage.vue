@@ -110,17 +110,6 @@
               </template>
             </vxe-column>
 
-            <!-- 第三方视角叙述（与视频提示词同接口生成，共用 loading） -->
-            <vxe-column field="narration" title="第三方视角叙述" min-width="180" :edit-render="{ name: 'input' }">
-              <template #default="{ row }">
-                <a-spin :spinning="!!row.videoPromptLoading" size="small" wrapperClassName="video-prompt-spin">
-                  <div class="prompt-cell">
-                    <span class="prompt-text" :title="row.narration">{{ row.narration || "-" }}</span>
-                  </div>
-                </a-spin>
-              </template>
-            </vxe-column>
-
             <!-- 时长 -->
             <vxe-column field="duration" title="时长(秒)" width="100" align="center">
               <template #default="{ row }">
@@ -173,7 +162,6 @@ type ImageDataItem = {
   shotIndex: number;
   src: string;
   dialogue?: string;
-  narration?: string;
   dataUrl?: string;
   superScoreLoading?: boolean;
   videoPromptLoading?: boolean;
@@ -197,13 +185,10 @@ function handleCheckboxChange() {
 const handleEditActived: VxeTableEvents.EditActived<ImageDataItem> = ({ row, column }) => {
   const field = column.field;
 
-  // 视频提示词、人物对话、第三方视角叙述 同接口生成，生成中禁止编辑
-  if (
-    (field === "videoPrompt" || field === "dialogue" || field === "narration") &&
-    row.videoPromptLoading
-  ) {
+  // 视频提示词、人物对话 同接口生成，生成中禁止编辑
+  if ((field === "videoPrompt" || field === "dialogue") && row.videoPromptLoading) {
     tableRef.value?.clearEdit();
-    antMessage.warning("正在生成提示词/对话/叙述，请稍候");
+    antMessage.warning("正在生成提示词/对话，请稍候");
     return;
   }
 
@@ -250,7 +235,6 @@ function updateRowsByIds(responseData: any[], statusKey: "isSuperScored" | "isVi
       if (updated.name !== undefined) row.name = updated.name;
       if (updated.src !== undefined) row.src = updated.src;
       if (updated.dialogue !== undefined) row.dialogue = updated.dialogue;
-      if (updated.narration !== undefined) row.narration = updated.narration;
       row[statusKey] = true;
     }
   });
@@ -353,7 +337,6 @@ async function handleBatchGeneratePrompts() {
         id: row.id,
         prompt: row.prompt,
         src: row.src,
-        narration: row.narration,
       })
       .then((res) => {
         // 请求成功，立即更新该行数据
@@ -402,7 +385,6 @@ function handleOk() {
         segmentId: item.segmentId,
         shotIndex: item.shotIndex,
         dialogue: item.dialogue ?? "",
-        narration: item.narration ?? "",
       })),
     })
     .then(() => {

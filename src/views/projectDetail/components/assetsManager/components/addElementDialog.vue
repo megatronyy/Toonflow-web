@@ -39,18 +39,9 @@
             placeholder="本镜头人物对白，格式「角色名：台词」，多句可换行；无则留空"
             :autoSize="{ minRows: 2, maxRows: 10 }" />
         </a-form-item>
-        <a-form-item v-if="props.type == 'storyboard'" name="narration" label="第三方视角叙述">
-          <a-textarea
-            v-model:value="formData.narration"
-            placeholder="从第三人称视角解释当前镜头的场景、人物状态与氛围，无则留空"
-            :autoSize="{ minRows: 2, maxRows: 10 }" />
-        </a-form-item>
         <!-- 备注 -->
         <a-form-item name="remark" label="备注">
           <a-input v-model:value="formData.remark" placeholder="添加备注信息..." />
-        </a-form-item>
-        <a-form-item v-if="props.type === 'role'" name="voiceId" label="音色">
-          <a-input v-model:value="formData.voiceId" placeholder="选填，用于视频/语音合成时该角色统一音色（如 TTS voice_id 或音色名称）" allow-clear />
         </a-form-item>
         <a-form-item v-if="props.type == 'storyboard'" name="duration" label="时长(单位：秒)">
           <a-input-number v-model:value="formData.duration" placeholder="时长" />
@@ -84,9 +75,7 @@ const props = defineProps<{
     remark: string;
     duration: number;
     videoPrompt: string;
-    voiceId?: string | null;
     dialogue?: string | null;
-    narration?: string | null;
   };
   scriptId?: number;
 }>();
@@ -111,9 +100,7 @@ const formData = ref<{
   remark: string;
   duration: number;
   videoPrompt: string;
-  voiceId?: string | null;
   dialogue?: string | null;
-  narration?: string | null;
 }>();
 const typeRecord = {
   role: "角色",
@@ -140,9 +127,7 @@ function handleSave() {
           prompt: formData.value.prompt ?? "",
           videoPrompt: formData.value.videoPrompt ?? "",
           duration: Number(formData.value.duration),
-          voiceId: formData.value.voiceId ?? undefined,
           dialogue: formData.value.dialogue ?? "",
-          narration: formData.value.narration ?? "",
         });
       } else {
         const res = await axios.post("/assets/addAssets", {
@@ -155,9 +140,7 @@ function handleSave() {
           videoPrompt: formData.value.videoPrompt ?? "",
           scriptId: props.type != "storyboard" ? undefined : Number(props.scriptId),
           duration: formData.value.duration,
-          voiceId: formData.value.voiceId ?? undefined,
           dialogue: formData.value.dialogue ?? "",
-          narration: formData.value.narration ?? "",
         });
       }
 

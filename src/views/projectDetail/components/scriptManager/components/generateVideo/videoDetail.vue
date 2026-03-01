@@ -18,10 +18,6 @@
             <div class="dialogue-box">
               {{ config.dialogue || "暂无" }}
             </div>
-            <h4 class="sub-title" style="margin-top: 12px">第三方视角叙述</h4>
-            <div class="dialogue-box">
-              {{ config.narration || "暂无" }}
-            </div>
           </div>
         </div>
 

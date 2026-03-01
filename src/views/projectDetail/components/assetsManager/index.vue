@@ -225,8 +225,8 @@ import batchGenereate from "./components/batchGenereate.vue";
 import generateImage from "./components/generateImage.vue";
 import store from "@/stores";
 import settingStore from "@/stores/setting";
-const { projectId, currentScriptId, project } = storeToRefs(store());
 const { otherSetting } = storeToRefs(settingStore());
+const { projectId, currentScriptId, project } = storeToRefs(store());
 
 interface ElementData {
   id: number;

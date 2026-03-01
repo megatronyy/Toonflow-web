@@ -81,7 +81,7 @@
 
       <a-divider v-if="mode === 'manual'" type="vertical" style="height: 100%" />
 
-      <!-- 中间面板 - 文本与生成结果 -->
+      <!-- 中间面板 - 生成结果 -->
       <a-flex vertical class="middle-panel">
         <a-card title="镜头提示词" :bordered="false" size="small" style="margin-bottom: 12px" v-if="mockStoryboard.prompt">
           {{ mockStoryboard.prompt }}
@@ -89,11 +89,8 @@
         <a-card title="视频提示词" :bordered="false" size="small" style="margin-bottom: 12px">
           {{ mockStoryboard.videoPrompt || "暂无" }}
         </a-card>
-        <a-card title="人物对话" :bordered="false" size="small" style="margin-bottom: 12px">
+        <a-card title="人物对话" :bordered="false" size="small" style="margin-bottom: 20px">
           {{ mockStoryboard.dialogue || "暂无" }}
-        </a-card>
-        <a-card title="第三方视角叙述" :bordered="false" size="small" style="margin-bottom: 20px">
-          {{ mockStoryboard.narration || "暂无" }}
         </a-card>
         <a-card title="生成结果" :bordered="false" size="small">
           <template v-if="mockStoryboard.generateImg && mockStoryboard.generateImg.length > 0">
@@ -183,7 +180,6 @@ interface Storyboard {
   videoPrompt?: string;
   duration?: number;
   dialogue?: string;
-  narration?: string;
   editPrompt: string;
   intro: string;
   generateImg: GenerateImg[];
@@ -233,7 +229,6 @@ const mockStoryboard = ref<Storyboard>({
   videoPrompt: "",
   duration: 0,
   dialogue: "",
-  narration: "",
   editPrompt: "",
   intro: "",
   generateImg: [],

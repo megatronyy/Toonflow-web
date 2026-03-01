@@ -75,11 +75,6 @@
             <a-textarea v-model:value="row.prompt" :auto-size="{ minRows: 2, maxRows: 12 }" @click="handleEditClick(row)" />
           </template>
         </vxe-column>
-        <vxe-column v-if="currentFilter === 'role'" title="音色" field="voiceId" show-overflow="title">
-          <template #default="{ row }">
-            <span>{{ row.voiceId || "-" }}</span>
-          </template>
-        </vxe-column>
         <vxe-column v-if="isStoryboard" title="视频提示词" field="videoPrompt" show-overflow="title">
           <template v-if="props.batch" #default="{ row }">
             <a-textarea v-model:value="row.videoPrompt" :auto-size="{ minRows: 2, maxRows: 12 }" @click="handleEditClick(row)" />
@@ -88,11 +83,6 @@
         <vxe-column v-if="isStoryboard" title="人物对话" field="dialogue" show-overflow="title">
           <template #default="{ row }">
             <span>{{ row.dialogue || "-" }}</span>
-          </template>
-        </vxe-column>
-        <vxe-column v-if="isStoryboard" title="第三方叙述" field="narration" show-overflow="title">
-          <template #default="{ row }">
-            <span>{{ row.narration || "-" }}</span>
           </template>
         </vxe-column>
         <vxe-column title="备注" field="remark" :edit-render="{ name: 'textarea' }" />
@@ -148,8 +138,6 @@ interface ElementData {
   type: string;
   videoPrompt: string;
   dialogue?: string;
-  narration?: string;
-  voiceId?: string;
 }
 
 interface ScriptItem {
@@ -275,8 +263,6 @@ const handleBatchSave = async (list: ElementData[]) => {
       duration: Number(item.duration),
       videoPrompt: item.videoPrompt,
       dialogue: item.dialogue ?? "",
-      narration: item.narration ?? "",
-      voiceId: item.voiceId ?? undefined,
     });
     await axios.post("/assets/saveAssets", {
       id: item.id,
@@ -348,7 +334,7 @@ const handleCheckedAll = (data: { checked: boolean; records: ElementData[] }) =>
 
 // CRUD 操作
 const addElement = () => {
-  currentRow.value = { id: 0, name: "", intro: "", duration: 0, filePath: "", type: "", prompt: "", remark: "", videoPrompt: "", dialogue: "", narration: "" };
+  currentRow.value = { id: 0, name: "", intro: "", duration: 0, filePath: "", type: "", prompt: "", remark: "", videoPrompt: "", dialogue: "" };
   addDialogShow.value = true;
 };
 

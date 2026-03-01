@@ -51,7 +51,6 @@ type ImageDataItem = {
   id: string;
   videoPrompt: string;
   dialogue?: string;
-  narration?: string;
   segmentId: number;
   shotIndex: number;
   prompt: string;
@@ -734,7 +733,6 @@ async function exportAll() {
           shotIndex: cellIndex + 1, // 镜头在片段内的序号，从1开始
           videoPrompt: "",
           dialogue: "",
-          narration: "",
           prompt: cell?.prompt || "",
           duration: "",
           projectId: props.projectId!,
