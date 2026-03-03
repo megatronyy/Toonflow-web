@@ -81,7 +81,10 @@
                   padding-top: 12px !important;
                   background-color: var(--td-bg-color-secondarycontainer) !important;
                   font-size: 1rem !important;
+                  cursor: pointer;
                 "
+                readonly
+                @click="selectArtStyle"
                 v-else
                 v-model:value="projectEditData.artStyle"
                 class="infoValue" />
@@ -115,6 +118,7 @@
         </div>
       </div>
     </div>
+    <artStyle v-model:artStyleShow="artStyleShow" v-model:artStyleData="projectEditData.artStyle" />
   </div>
 </template>
 
@@ -122,6 +126,7 @@
 import axios from "@/utils/axios";
 import { message } from "ant-design-vue";
 import store from "@/stores";
+import artStyle from "@/views/project/components/artStyle.vue";
 const { project, projectId } = storeToRefs(store());
 
 const globalSettingEdit = ref(false);
@@ -230,6 +235,10 @@ function updateProject() {
     .catch(() => {
       message.error("全局设置更新失败");
     });
+}
+const artStyleShow = ref<boolean>(false);
+function selectArtStyle() {
+  artStyleShow.value = true;
 }
 </script>
 
