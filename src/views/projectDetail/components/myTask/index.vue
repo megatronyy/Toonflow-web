@@ -17,16 +17,24 @@
         <div class="content">
           <t-table :data="taskItem" :columns="columns" row-key="id" :loading="pageValue.loading" :hover="true" :stripe="true">
             <template #state="{ row }">
+              <t-tooltip v-if="row.state === '生成失败'" :content="row.reason || '暂无失败原因'" placement="top">
+                <span
+                  :style="{
+                    color: '#ff4d4f',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                  }">
+                  {{ row.state }}
+                </span>
+              </t-tooltip>
               <span
+                v-else
                 :style="{
-                  color: row.state === '进行中' ? '#1890ff' : row.state === '生成失败' ? '#ff4d4f' : '#52c41a',
+                  color: row.state === '进行中' ? '#1890ff' : '#52c41a',
                   fontWeight: 'bold',
                 }">
                 {{ row.state }}
               </span>
-            </template>
-            <template #startTime="{ row }">
-              {{ dayjs(row.startTime).format("YYYY-MM-DD HH:mm:ss") }}
             </template>
           </t-table>
           <div class="pagination" style="margin-top: 10px">
@@ -75,6 +83,7 @@ interface taskData {
   episode: string;
   state: string;
   startTime: number;
+  reason?: string;
 }
 
 const columns: PrimaryTableCol<any>[] = [
