@@ -25,7 +25,6 @@ const { baseUrl, wsBaseUrl } = storeToRefs(store);
 // 从 URL query 参数设置请求地址
 const initFromQuery = () => {
   const query = route.query;
-  console.log('Current query:', query);
   // 支持通过 ?baseUrl=xxx 设置请求地址
   if (query.baseUrl && typeof query.baseUrl === "string") {
     baseUrl.value = query.baseUrl;

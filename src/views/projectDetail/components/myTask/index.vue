@@ -11,6 +11,7 @@
               <t-option key="全部" label="全部" value="" />
               <t-option key="进行中" label="进行中" value="进行中" />
               <t-option key="已完成" label="已完成" value="已完成" />
+              <t-option key="生成失败" label="生成失败" value="生成失败" />
             </t-select>
           </div>
         </div>
