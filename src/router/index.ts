@@ -19,10 +19,10 @@ const router = createRouter({
       component: () => import("@/pages/workbench/index.vue"),
       redirect: "/project",
       children: [
-        // {
-        //   path: "/project",
-        //   component: () => import("@/views/project/index.vue"),
-        // },
+        {
+          path: "/project",
+          component: () => import("@/views/project/index.vue"),
+        },
         // {
         //   path: "/projectDetail",
         //   component: () => import("@/views/projectDetail/index.vue"),
