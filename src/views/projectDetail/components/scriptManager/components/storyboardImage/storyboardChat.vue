@@ -1,21 +1,22 @@
 <template>
-  <a-modal
-    :footer="null"
-    :style="{ top: '30px', width: '100vw' }"
-    v-model:open="modalShow"
+  <t-dialog
+    top="1vh"
+    v-model:visible="modalShow"
     :maskClosable="false"
     wrapClassName="noHeaderMargin"
     dialogClass="customModal"
     :keyboard="false"
+    :footer="false"
+    :close-btn="false"
     :closable="false"
     width="90%">
-    <template #title>
-      <div class="ac jb titHeader" style="background: #f9faff; height: 60px; display: flex; width: 100%">
+    <template #header>
+      <div class="ac jb titHeader" style="height: 60px; display: flex; width: 100%">
         <div>
           <span style="font-weight: bold; font-size: 18px; margin-left: 24px">分镜图生成</span>
         </div>
         <div class="closePoint" @click="cancelModal">
-          <i-close theme="outline" size="18" fill="#9913FA" />
+          <i-close theme="outline" size="18" />
         </div>
       </div>
     </template>
@@ -25,7 +26,7 @@
         <chat ref="chatRef" :canSend="canSend" enterToSend :sendApi="sendApi" v-model="history" />
         <div class="f ac jb">
           <div></div>
-          <a-button class="btn" type="primary" @click="exportAll">导出全部镜头({{ imageNumber }})</a-button>
+          <t-button class="btn" @click="exportAll">导出全部镜头({{ imageNumber }})</t-button>
         </div>
       </div>
     </div>
@@ -35,7 +36,7 @@
       v-model:imageData="imageData"
       v-model:modalShow="modalShow"
       @save="$emit('save')" />
-  </a-modal>
+  </t-dialog>
 </template>
 
 <script setup lang="ts">

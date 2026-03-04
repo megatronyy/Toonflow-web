@@ -1,9 +1,10 @@
 <template>
-  <a-modal
-    v-model:open="visible"
-    :title="title"
+  <t-dialog
+    v-model:visible="visible"
+    :header="title"
     @ok="confirmSelection"
     @cancel="handleCancel"
+    top="1vh"
     width="80%"
     :bodyStyle="{ maxHeight: '70vh', overflow: 'auto' }">
     <mainElement
@@ -17,12 +18,12 @@
       <div class="selector-footer">
         <span class="selected-count">已选择 {{ tempSelectedImages.length }} 张</span>
         <div>
-          <a-button @click="handleCancel">取消</a-button>
-          <a-button type="primary" @click="confirmSelection">确定</a-button>
+          <t-button @click="handleCancel">取消</t-button>
+          <t-button @click="confirmSelection">确定</t-button>
         </div>
       </div>
     </template>
-  </a-modal>
+  </t-dialog>
 </template>
 
 <script setup lang="ts">

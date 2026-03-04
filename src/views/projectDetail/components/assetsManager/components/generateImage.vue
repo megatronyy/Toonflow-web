@@ -1,22 +1,25 @@
 <template>
-  <a-modal
-    v-model:open="modalShow"
+  <t-dialog
+    :visible.sync="modalShow"
     wrapClassName="noHeaderMargin"
     destroyOnClose
     :footer="false"
     :width="900"
+    top="2vh"
     dialogClass="customModal"
     :closable="false"
-    :maskClosable="false">
-    <template #title>
+    :close-btn="false"
+    :maskClosable="false"
+    @close="close">
+    <template #header>
       <div class="titHeader">
         <div class="titleWrapper">
           <div class="titleIcon">
-            <i-pic class="icon" theme="outline" size="20" fill="#9913FA" />
+            <i-pic class="icon" theme="outline" size="20" />
           </div>
           <span class="title">图片生成</span>
         </div>
-        <i-close class="closeBtn" theme="outline" size="20" fill="#666" @click="close" />
+        <i-close class="closeBtn" theme="outline" size="20" @click="close" />
       </div>
     </template>
     <a-spin :spinning="fakeLoading" tip="发送数据中...">
@@ -50,13 +53,13 @@
                     <div class="imageDiv pr">
                       <a-image :src="currentImage" alt="元素图片" class="elementImg" :fallback="errorPictrue" />
                       <div class="imageOverlay">
-                        <i-delete class="deleteBtn" theme="outline" size="18" fill="#fff" @click.stop="deleteImage" />
+                        <i-delete class="deleteBtn" theme="outline" size="18" @click.stop="deleteImage" />
                       </div>
                     </div>
                   </template>
                   <div v-else class="uploadPlaceholder">
                     <div class="uploadIconWrapper">
-                      <i-upload-picture theme="outline" size="32" fill="#9913FA" />
+                      <i-upload-picture theme="outline" size="32" />
                     </div>
                     <span class="uploadText">点击上传</span>
                   </div>
@@ -111,13 +114,13 @@
                     <template v-if="(item.state === '生成成功' || !item.state) && item.filePath">
                       <a-image :preview="false" :src="item.filePath" :fallback="errorPictrue" class="resultImg" />
                       <div class="resultOverlay">
-                        <i-preview-open class="previewBtn" theme="outline" size="20" fill="#fff" @click.stop="previewImage(item.filePath)" />
+                        <i-preview-open class="previewBtn" theme="outline" size="20" @click.stop="previewImage(item.filePath)" />
                       </div>
                       <div class="del">
-                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" fill="#d0021b" @click.stop="delImage(item)" />
+                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" @click.stop="delImage(item)" />
                       </div>
                       <div v-if="selectedIndex === index" class="selectedBadge">
-                        <i-check theme="outline" size="14" fill="#fff" />
+                        <i-check theme="outline" size="14" />
                       </div>
                     </template>
                     <template v-else-if="item.state === '生成中'">
@@ -126,19 +129,19 @@
                         <span>生成中...</span>
                       </div>
                       <div class="del">
-                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" fill="#d0021b" @click.stop="delImage(item)" />
+                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" @click.stop="delImage(item)" />
                       </div>
                     </template>
                     <template v-else-if="item.state === '生成失败'">
                       <div class="errorPlaceholder">生成失败</div>
                       <div class="del">
-                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" fill="#d0021b" @click.stop="delImage(item)" />
+                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" @click.stop="delImage(item)" />
                       </div>
                     </template>
                     <template v-else>
                       <div class="errorPlaceholder">未知状态</div>
                       <div class="del">
-                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" fill="#d0021b" @click.stop="delImage(item)" />
+                        <i-delete class="delImage" style="margin-left: 5px" theme="outline" size="20" @click.stop="delImage(item)" />
                       </div>
                     </template>
                   </div>
@@ -158,7 +161,7 @@
         </div>
       </div>
     </a-spin>
-  </a-modal>
+  </t-dialog>
 
   <!-- 图片预览 -->
   <a-image :width="200" style="display: none" :preview="{ visible: previewVisible, onVisibleChange: setPreviewVisible }" :src="previewUrl" />
@@ -461,10 +464,10 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  background: var(--td-bg-color-container);
   height: 64px;
   width: 100%;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--td-component-border);
 
   .titleWrapper {
     display: flex;
@@ -475,17 +478,21 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     .titleIcon {
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+      background: var(--td-brand-color);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+
+      .icon {
+        color: var(--td-text-color-anti);
+      }
     }
 
     .title {
       font-weight: 600;
       font-size: 18px;
-      color: #1f2937;
+      color: var(--td-text-color-primary);
     }
   }
 
@@ -495,26 +502,29 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     padding: 6px;
     border-radius: 8px;
     transition: all 0.2s;
+    color: var(--td-text-color-secondary);
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--td-bg-color-component-hover);
+      color: var(--td-text-color-primary);
     }
   }
 }
 
 .modelBody {
   padding: 20px 24px;
-  background: #fafbfc;
+  background: var(--td-bg-color-page);
 
   .modeSwitch {
     margin-bottom: 20px;
     display: flex;
 
     :deep(.ant-radio-group) {
-      background: #fff;
+      background: var(--td-bg-color-container);
       padding: 4px;
       border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--td-component-border);
+      box-shadow: 0 1px 3px var(--td-shadow-1);
     }
 
     :deep(.ant-radio-button-wrapper) {
@@ -533,12 +543,16 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
 
       &:not(.ant-radio-button-wrapper-checked) {
         background: transparent;
-        color: #666;
+        color: var(--td-text-color-secondary);
       }
 
       &.ant-radio-button-wrapper-checked {
-        background: linear-gradient(135deg, #9913fa 0%, #7c3aed 100%);
-        color: #fff;
+        background: var(--td-brand-color);
+        color: var(--td-text-color-anti);
+      }
+
+      &:hover:not(.ant-radio-button-wrapper-checked) {
+        color: var(--td-text-color-primary);
       }
     }
   }
@@ -559,11 +573,11 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
   }
 
   .sectionCard {
-    background: #fff;
+    background: var(--td-bg-color-container);
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border: 1px solid #f0f0f0;
+    box-shadow: 0 2px 8px var(--td-shadow-1);
+    border: 1px solid var(--td-component-border);
   }
 
   .resultCard {
@@ -581,9 +595,18 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
         width: 6px;
       }
 
-      &::-webkit-scrollbar-thumb {
-        background: #ddd;
+      &::-webkit-scrollbar-track {
+        background: var(--td-bg-color-component);
         border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--td-scrollbar-color);
+        border-radius: 3px;
+
+        &:hover {
+          background: var(--td-scrollbar-hover-color);
+        }
       }
     }
   }
@@ -598,15 +621,16 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
   .namePre {
     font-size: 15px;
     font-weight: 600;
-    color: #374151;
+    color: var(--td-text-color-primary);
   }
 
   .optionalTag {
     font-size: 12px;
-    color: #9ca3af;
-    background: #f3f4f6;
+    color: var(--td-text-color-placeholder);
+    background: var(--td-bg-color-component);
     padding: 2px 8px;
     border-radius: 4px;
+    border: 1px solid var(--td-component-border);
   }
 
   .uploadSection {
@@ -617,10 +641,10 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     width: 100%;
     aspect-ratio: 1/1;
     max-width: 100px;
-    border: 2px dashed #e5e7eb;
+    border: 2px dashed var(--td-component-border);
     border-radius: 16px;
     overflow: hidden;
-    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    background: var(--td-bg-color-component);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -628,9 +652,9 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     transition: all 0.3s ease;
 
     &:hover {
-      border-color: #9913fa;
-      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-      box-shadow: 0 4px 12px rgba(153, 19, 250, 0.15);
+      border-color: var(--td-brand-color);
+      background: var(--td-brand-color-1);
+      box-shadow: 0 4px 12px var(--td-shadow-2);
     }
   }
 
@@ -644,17 +668,18 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     .uploadIconWrapper {
       width: 26px;
       height: 26px;
-      background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+      background: var(--td-brand-color-1);
       border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--td-brand-color);
     }
 
     .uploadText {
       font-size: 14px;
       font-weight: 500;
-      color: #374151;
+      color: var(--td-brand-color);
     }
   }
 
@@ -665,7 +690,7 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     .imageOverlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.4);
+      background: var(--td-mask-active);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -679,13 +704,15 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
 
     .deleteBtn {
       padding: 8px;
-      background: rgba(239, 68, 68, 0.9);
+      background: var(--td-error-color);
       border-radius: 8px;
       cursor: pointer;
       transition: transform 0.2s;
+      color: var(--td-text-color-anti);
 
       &:hover {
         transform: scale(1.1);
+        background: var(--td-error-color-hover);
       }
     }
   }
@@ -696,28 +723,30 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     .magicBtn {
       padding: 0;
       height: auto;
-      color: #9913fa;
+      color: var(--td-brand-color);
       font-size: 13px;
 
       &:hover {
-        color: #7c3aed;
+        color: var(--td-brand-color-hover);
       }
     }
 
     .promptTextarea {
       border-radius: 12px;
-      border-color: #e5e7eb;
+      border-color: var(--td-component-border);
       padding: 12px 14px;
       font-size: 14px;
       resize: none;
+      background: var(--td-bg-color-container);
+      color: var(--td-text-color-primary);
 
       &:focus {
-        border-color: #9913fa;
-        box-shadow: 0 0 0 3px rgba(153, 19, 250, 0.1);
+        border-color: var(--td-brand-color);
+        box-shadow: 0 0 0 3px var(--td-brand-color-1);
       }
 
       &::placeholder {
-        color: #9ca3af;
+        color: var(--td-text-color-placeholder);
       }
     }
   }
@@ -727,15 +756,16 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     height: 48px;
     font-size: 15px;
     font-weight: 500;
-    background: linear-gradient(135deg, #9913fa 0%, #7c3aed 100%);
+    background: var(--td-brand-color);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    color: var(--td-text-color-anti);
 
     &:hover {
-      background: linear-gradient(135deg, #8b11e0 0%, #6d28d9 100%);
+      background: var(--td-brand-color-hover);
     }
   }
 
@@ -753,19 +783,17 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
     position: relative;
     border: 2px solid transparent;
     transition: all 0.2s ease;
-    background: #f9fafb;
+    background: var(--td-bg-color-component);
 
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
+      box-shadow: 0 4px 12px var(--td-shadow-2);
       .resultOverlay {
         opacity: 1;
       }
     }
 
     &.selected {
-      border-color: #9913fa;
-      box-shadow: 0 0 0 3px rgba(153, 19, 250, 0.2);
+      border-color: var(--td-brand-color);
     }
 
     &.generating {
@@ -781,12 +809,13 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      z-index: 999999;
     }
 
     .resultOverlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--td-mask-active);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -795,22 +824,36 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
 
       .previewBtn {
         padding: 8px;
-        background: rgba(255, 255, 255, 0.2);
+        background: var(--td-bg-color-container);
         border-radius: 8px;
         backdrop-filter: blur(4px);
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.2s;
+        color: var(--td-text-color-primary);
 
         &:hover {
-          background: rgba(255, 255, 255, 0.3);
+          background: var(--td-bg-color-component-hover);
         }
       }
     }
+
     .del {
       position: absolute;
       right: 8px;
       bottom: 8px;
       cursor: pointer;
+
+      .delImage {
+        color: var(--td-error-color);
+        padding: 4px;
+        background: var(--td-bg-color-container);
+        border-radius: 6px;
+        transition: all 0.2s;
+
+        &:hover {
+          background: var(--td-error-color-1);
+        }
+      }
     }
 
     .selectedBadge {
@@ -819,12 +862,13 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
       right: 8px;
       width: 24px;
       height: 24px;
-      background: linear-gradient(135deg, #9913fa 0%, #7c3aed 100%);
+      background: var(--td-brand-color);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 6px rgba(153, 19, 250, 0.4);
+      box-shadow: 0 2px 6px var(--td-shadow-1);
+      color: var(--td-text-color-anti);
     }
 
     .generatingPlaceholder {
@@ -835,13 +879,13 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
       align-items: center;
       justify-content: center;
       gap: 10px;
-      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-      border: 1px dashed #d1d5db;
+      background: var(--td-bg-color-component);
+      border: 1px dashed var(--td-component-border);
       border-radius: 10px;
 
       span {
         font-size: 12px;
-        color: #6b7280;
+        color: var(--td-text-color-secondary);
       }
     }
 
@@ -851,8 +895,8 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #fef2f2;
-      color: #ef4444;
+      background: var(--td-error-color-1);
+      color: var(--td-error-color);
       font-size: 12px;
     }
   }
@@ -860,7 +904,7 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
   .footerBtns {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--td-component-border);
     display: flex;
     justify-content: flex-end;
     gap: 12px;
@@ -872,11 +916,24 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
       font-size: 15px;
 
       &.ant-btn-primary {
-        background: linear-gradient(135deg, #9913fa 0%, #7c3aed 100%);
+        background: var(--td-brand-color);
         border: none;
+        color: var(--td-text-color-anti);
 
         &:hover {
-          background: linear-gradient(135deg, #8b11e0 0%, #6d28d9 100%);
+          background: var(--td-brand-color-hover);
+        }
+      }
+
+      &:not(.ant-btn-primary) {
+        background: var(--td-bg-color-container);
+        border: 1px solid var(--td-component-border);
+        color: var(--td-text-color-secondary);
+
+        &:hover {
+          background: var(--td-bg-color-component-hover);
+          color: var(--td-text-color-primary);
+          border-color: var(--td-brand-color);
         }
       }
     }
@@ -896,7 +953,7 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
   margin: 40px 0;
 
   .ant-empty-description {
-    color: #9ca3af;
+    color: var(--td-text-color-placeholder);
   }
 }
 
@@ -904,8 +961,16 @@ async function blobUrlToBase64(blobUrl: string): Promise<string> {
   border-radius: 6px;
   border: none;
   font-size: 12px;
+  background: var(--td-brand-color-1);
+  color: var(--td-brand-color);
+  border: 1px solid var(--td-brand-color-2);
 }
+
 :deep(.ant-image-img) {
   height: 100%;
+}
+
+:deep(.ant-spin) {
+  color: var(--td-brand-color);
 }
 </style>

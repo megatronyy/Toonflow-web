@@ -1,10 +1,10 @@
 <template>
   <div class="newStoryboard">
-    <a-modal
+    <t-dialog
       width="80vw"
       :style="{ top: '20px' }"
-      v-model:open="storyboardShow"
-      title="添加视频配置"
+      v-model:visible="storyboardShow"
+      header="添加视频配置"
       okText="保存配置"
       @ok="handleOk"
       @cancel="handleCancel"
@@ -12,38 +12,38 @@
       <div class="configPanel">
         <div class="configHeader">
           <h3>视频生成配置</h3>
-          <a-button type="primary" @click="addVideoConfig">
+          <t-button @click="addVideoConfig">
             <plus-outlined />
             添加配置
-          </a-button>
+          </t-button>
         </div>
         <!-- 视频配置列表 Grid 布局 -->
         <div class="configList" v-if="videoConfigs.length > 0">
           <div v-for="(config, index) in videoConfigs" :key="config.id" class="configCard">
             <div class="cardHeader">
               <span class="cardTitle">配置 {{ index + 1 }}</span>
-              <a-button type="text" danger size="small" @click="removeVideoConfig(index)">
+              <t-button danger size="small" @click="removeVideoConfig(index)">
                 <delete-outlined />
-              </a-button>
+              </t-button>
             </div>
             <div class="cardBody">
               <!-- 厂商选择 -->
               <div class="formRow">
                 <label>模型</label>
-                <a-select v-model:value="config.configId" @change="onManufacturerChange(config)" :disabled="allManufacturerDisable" size="small">
-                  <a-select-option v-for="item in availableManufacturers" :key="item.value" :value="item.value">
+                <t-select v-model="config.configId" @change="onManufacturerChange(config)" :disabled="allManufacturerDisable" size="small">
+                  <t-option v-for="item in availableManufacturers" :value="item.value" :label="item.label" :key="item.value">
                     {{ item.label }}
-                  </a-select-option>
-                </a-select>
+                  </t-option>
+                </t-select>
               </div>
               <!-- 模式选择 -->
               <div class="formRow">
                 <label>模式</label>
-                <a-radio-group v-model:value="config.mode" @change="onModeChange(config)" size="small">
-                  <a-radio v-for="mode in getModeOptions(config.manufacturer, config.model)" :key="mode.value" :value="mode.value">
+                <t-radio-group v-model:value="config.mode" @change="onModeChange(config)" size="small">
+                  <t-radio v-for="mode in getModeOptions(config.manufacturer, config.model)" :key="mode.value" :value="mode.value">
                     {{ mode.label }}
-                  </a-radio>
-                </a-radio-group>
+                  </t-radio>
+                </t-radio-group>
               </div>
               <!-- 首尾帧模式配置 -->
               <template v-if="config.mode === 'startEnd'">
@@ -53,9 +53,9 @@
                     <div class="frameBox" :class="{ hasImage: config.startFrame }" @click="openImageSelector(config, 'start')">
                       <template v-if="config.startFrame">
                         <img :src="config.startFrame.filePath" />
-                        <a-button class="removeBtn" type="text" size="small" @click.stop="config.startFrame = null">
+                        <t-button class="removeBtn" size="small" @click.stop="config.startFrame = null">
                           <close-outlined />
-                        </a-button>
+                        </t-button>
                         <span class="frameLabel">首帧</span>
                       </template>
                       <template v-else>
@@ -66,9 +66,9 @@
                     <div class="frameBox" :class="{ hasImage: config.endFrame }" @click="openImageSelector(config, 'end')">
                       <template v-if="config.endFrame">
                         <img :src="config.endFrame.filePath" />
-                        <a-button class="removeBtn" type="text" size="small" @click.stop="config.endFrame = null">
+                        <t-button class="removeBtn" size="small" @click.stop="config.endFrame = null">
                           <close-outlined />
-                        </a-button>
+                        </t-button>
                         <span class="frameLabel">尾帧</span>
                       </template>
                       <template v-else>
@@ -98,9 +98,9 @@
                             <img class="image" :src="element.filePath" draggable="false" />
                             <div class="imageOrder">{{ imgIndex + 1 }}</div>
                           </div>
-                          <a-button class="removeBtn" type="text" size="small" @click="removeImageFromConfig(config, imgIndex)">
+                          <t-button class="removeBtn" size="small" @click="removeImageFromConfig(config, imgIndex)">
                             <close-outlined />
-                          </a-button>
+                          </t-button>
                         </div>
                       </template>
                     </draggable>
@@ -125,9 +125,9 @@
                     <div class="frameBox singleFrame" :class="{ hasImage: config.startFrame }" @click="openImageSelector(config, 'start')">
                       <template v-if="config.startFrame">
                         <img :src="config.startFrame.filePath" />
-                        <a-button class="removeBtn" type="text" size="small" @click.stop="config.startFrame = null">
+                        <t-button class="removeBtn" type="submit" size="small" @click.stop="config.startFrame = null">
                           <close-outlined />
-                        </a-button>
+                        </t-button>
                       </template>
                       <template v-else>
                         <plus-outlined />
@@ -140,30 +140,30 @@
               <!-- 分辨率/比例 -->
               <div class="formRow">
                 <label>{{ getResolutionLabel(config.manufacturer, config.model) }}</label>
-                <a-select v-model:value="config.resolution" size="small" style="width: 140px">
-                  <a-select-option v-for="res in getResolutionOptions(config.manufacturer, config.model)" :key="res.value" :value="res.value">
+                <t-select v-model:value="config.resolution" size="small" style="width: 100%">
+                  <t-option v-for="res in getResolutionOptions(config.manufacturer, config.model)" :key="res.value" :value="res.value">
                     {{ res.label }}
-                  </a-select-option>
-                </a-select>
+                  </t-option>
+                </t-select>
               </div>
               <!-- 时长 -->
               <div class="formRow">
                 <label>时长</label>
                 <template v-if="getDurationOptions(config.manufacturer, config.model).length > 0">
-                  <a-select v-model:value="config.duration" size="small" style="width: 100px">
-                    <a-select-option v-for="dur in getDurationOptions(config.manufacturer, config.model)" :key="dur.value" :value="dur.value">
+                  <t-select v-model:value="config.duration" size="small" style="width: 100%">
+                    <t-option v-for="dur in getDurationOptions(config.manufacturer, config.model)" :key="dur.value" :value="dur.value">
                       {{ dur.label }}
-                    </a-select-option>
-                  </a-select>
+                    </t-option>
+                  </t-select>
                 </template>
                 <template v-else>
-                  <a-input-number
-                    v-model:value="config.duration"
+                  <t-input-number
+                    v-model="config.duration"
                     :min="getDurationRange(config.manufacturer, config.model).min"
                     :max="getDurationRange(config.manufacturer, config.model).max"
                     :step="getDurationRange(config.manufacturer, config.model).step"
                     size="small"
-                    style="width: 70px" />
+                    style="width: 160px" />
                   <span class="unit">秒</span>
                   <span class="tip">{{ getDurationTip(config.manufacturer, config.model) }}</span>
                 </template>
@@ -178,16 +178,15 @@
               <div class="formRow promptRow">
                 <label>提示词</label>
                 <div class="promptWrapper">
-                  <a-textarea v-model:value="config.prompt" :rows="2" placeholder="描述视频内容、运动方式等" size="small" />
-                  <a-button
+                  <t-textarea v-model:value="config.prompt" :rows="2" placeholder="描述视频内容、运动方式等" size="small" />
+                  <t-button
                     class="magicBtn"
-                    type="link"
                     size="small"
                     :loading="config.promptLoading"
                     @click="generateConfigPrompt(config)"
                     style="margin-right: 20px">
                     <i-magic />
-                  </a-button>
+                  </t-button>
                 </div>
               </div>
             </div>
@@ -195,11 +194,12 @@
         </div>
         <a-empty v-else description="请点击上方按钮添加视频配置" />
       </div>
-    </a-modal>
+    </t-dialog>
     <!-- 分镜图片选择弹窗 -->
-    <a-modal
-      v-model:open="imageSelectorVisible"
-      :title="imageSelectorTitle"
+    <t-dialog
+      top="1vh"
+      v-model:visible="imageSelectorVisible"
+      :header="imageSelectorTitle"
       @ok="confirmImageSelection"
       @cancel="imageSelectorVisible = false"
       width="80%"
@@ -215,12 +215,12 @@
         <div class="selectorFooter">
           <span class="selectedCount">已选择 {{ tempSelectedImages.length }} 张</span>
           <div>
-            <a-button @click="imageSelectorVisible = false">取消</a-button>
-            <a-button type="primary" @click="confirmImageSelection">确定</a-button>
+            <t-button @click="imageSelectorVisible = false">取消</t-button>
+            <t-button @click="confirmImageSelection">确定</t-button>
           </div>
         </div>
       </template>
-    </a-modal>
+    </t-dialog>
   </div>
 </template>
 
@@ -298,7 +298,11 @@ const manufacturerAllRecord: Record<string, string> = Object.values(manufacturer
 }, {});
 const availableManufacturers = computed(() => {
   if (manufacturerList.value.length === 0) return [];
-  return manufacturerList.value.map((i) => ({ label: i.model + " " +manufacturerAllRecord[i.manufacturer], value: i.id, manufacturer: i.manufacturer }));
+  return manufacturerList.value.map((i) => ({
+    label: i.model + " " + manufacturerAllRecord[i.manufacturer],
+    value: i.id,
+    manufacturer: i.manufacturer,
+  }));
 });
 onMounted(async () => {
   getModelList();
@@ -553,7 +557,7 @@ function handleCancel() {
 <style lang="scss" scoped>
 .configPanel {
   padding: 16px;
-  background: #fafafa;
+  background: var(--td-bg-color-container);
   border-radius: 8px;
   max-height: 70vh;
   overflow-y: auto;
@@ -575,8 +579,8 @@ function handleCancel() {
   gap: 16px;
 }
 .configCard {
-  background: #fff;
-  border: 1px solid #e8e8e8;
+  background: var(--td-bg-color);
+  border: 1px solid var(--td-border-level-1-color);
   border-radius: 8px;
   overflow: hidden;
   transition: box-shadow 0.2s;
@@ -588,8 +592,8 @@ function handleCancel() {
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
-    background: #f5f5f5;
-    border-bottom: 1px solid #e8e8e8;
+    background: var(--td-bg-color);
+    border-bottom: 1px solid var(--td-border-level-1-color);
     .cardTitle {
       font-weight: 500;
       font-size: 14px;
@@ -647,7 +651,7 @@ function handleCancel() {
   width: 150px;
   height: auto;
   min-height: 70px;
-  border: 1px dashed #d9d9d9;
+  border: 1px dashed var(--td-border-level-1-color);
   border-radius: 4px;
   display: flex;
   flex-direction: column;
@@ -657,16 +661,16 @@ function handleCancel() {
   transition: all 0.2s;
   position: relative;
   overflow: hidden;
-  background: #fafafa;
+  background: var(--td-bg-color-container);
   font-size: 10px;
-  color: #999;
+  color: var(--td-text-color);
   &.singleFrame {
     width: 90px;
     height: 68px;
   }
   &:hover {
     border-color: #1890ff;
-    background: #e6f7ff;
+    background: var(--td-bg-color);
   }
   &.hasImage {
     border-style: solid;
@@ -691,7 +695,7 @@ function handleCancel() {
       position: absolute;
       top: 0;
       right: 0;
-      background: rgba(255, 255, 255, 0.9);
+      background: var(--td-border-level-1-color);
       border-radius: 0 0 0 4px;
       width: 16px;
       height: 16px;
@@ -763,7 +767,7 @@ function handleCancel() {
       position: absolute;
       top: 0;
       right: 0;
-      background: rgba(255, 255, 255, 0.9);
+      background: var(--td-border-level-1-color);
       border-radius: 0 0 0 4px;
       width: 14px;
       height: 14px;

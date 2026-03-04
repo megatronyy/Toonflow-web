@@ -6,8 +6,9 @@
     :width="640"
     dialogClass="customModal"
     :closable="false"
+    :close-btn="false"
     :maskClosable="false">
-    <template #title>
+    <template #header>
       <div class="ac jb titHeader" style="background: #f9faff; height: 60px; display: flex; width: 100%" v-if="formData">
         <div>
           <span style="font-weight: bold; font-size: 18px; margin-left: 24px">{{ formData.id ? "编辑" : "新建" }}{{ typeRecord[props.type] }}</span>

@@ -49,49 +49,48 @@
       </div>
 
       <!-- 数据表格 -->
-      <vxe-table
+      <t-table
         v-else
         ref="tableRef"
         :data="projectElements"
-        :cell-config="{ height: props.batch ? 300 : 120 }"
-        :row-config="{ keyField: 'id', resizable: true }"
-        :radio-config="{ reserve: true }"
-        :checkbox-config="{ reserve: true }"
-        @checkbox-all="handleCheckedAll"
-        @checkbox-change="handleCheckedChange"
-        @radio-change="handleRadioChange"
-        round>
-        <vxe-column v-if="props.way" :type="props.way" title="请选择" width="100" />
-        <vxe-column title="名称" field="name" width="150" show-overflow="title" :edit-render="{ name: 'input' }" />
-        <vxe-column title="元素图片" width="120">
-          <template #default="{ row }">
-            <a-image v-if="row.filePath" :src="row.filePath" :fallback="errorPicture" class="elementImage" />
-            <div v-else class="noImage">未生成图片</div>
+        :columns="tableColumns"
+        row-key="id"
+        :hover="true"
+        :stripe="true"
+        :selected-row-keys="selectedRowKeys"
+        @select-change="handleSelectChange">
+        <template #filePath="{ row }">
+          <a-image v-if="row.filePath" :src="row.filePath" :fallback="errorPicture" class="elementImage" />
+          <div v-else class="noImage">未生成图片</div>
+        </template>
+        <template #prompt="{ row }">
+          <template v-if="props.batch">
+            <a-textarea v-model:value="row.prompt" :auto-size="{ minRows: 2, maxRows: 12 }" />
           </template>
-        </vxe-column>
-        <vxe-column title="详情" field="intro" show-overflow="title" :edit-render="{ name: 'textarea' }" />
-        <vxe-column title="生图提示词" field="prompt" show-overflow="title">
-          <template v-if="props.batch" #default="{ row }">
-            <a-textarea v-model:value="row.prompt" :auto-size="{ minRows: 2, maxRows: 12 }" @click="handleEditClick(row)" />
+          <template v-else>
+            <t-tooltip :content="row.prompt" placement="top">
+              <span class="text-ellipsis">{{ row.prompt }}</span>
+            </t-tooltip>
           </template>
-        </vxe-column>
-        <vxe-column v-if="isStoryboard" title="视频提示词" field="videoPrompt" show-overflow="title">
-          <template v-if="props.batch" #default="{ row }">
-            <a-textarea v-model:value="row.videoPrompt" :auto-size="{ minRows: 2, maxRows: 12 }" @click="handleEditClick(row)" />
+        </template>
+        <template #videoPrompt="{ row }">
+          <template v-if="props.batch">
+            <a-textarea v-model:value="row.videoPrompt" :auto-size="{ minRows: 2, maxRows: 12 }" />
           </template>
-        </vxe-column>
-        <vxe-column title="备注" field="remark" :edit-render="{ name: 'textarea' }" />
-        <vxe-column v-if="isStoryboard" title="时长(单位：秒)" field="duration" />
-        <vxe-column v-if="!props.batch" title="操作" width="auto" fixed="right">
-          <template #default="{ row }">
-            <div class="actionBtns">
-              <i-pencil class="hoverButton edit" @click="editForm(row)" />
-              <i-magic class="hoverButton magic" @click="aiGenerate(row)" />
-              <i-delete class="hoverButton delete" @click="deleteFrom(row)" />
-            </div>
+          <template v-else>
+            <t-tooltip :content="row.videoPrompt" placement="top">
+              <span class="text-ellipsis">{{ row.videoPrompt }}</span>
+            </t-tooltip>
           </template>
-        </vxe-column>
-      </vxe-table>
+        </template>
+        <template #operation="{ row }">
+          <div class="actionBtns">
+            <i-pencil class="hoverButton edit" @click="editForm(row)" />
+            <i-magic class="hoverButton magic" @click="aiGenerate(row)" />
+            <i-delete class="hoverButton delete" @click="deleteFrom(row)" />
+          </div>
+        </template>
+      </t-table>
     </div>
 
     <!-- 弹窗组件 -->
@@ -110,7 +109,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { message, Modal } from "ant-design-vue";
-import type { VxeTableInstance } from "vxe-table";
+import type { PrimaryTableCol, TableRowData } from "tdesign-vue-next";
 import axios from "@/utils/axios";
 import errorPicture from "@/utils/error";
 import store from "@/stores";
@@ -171,17 +170,61 @@ const RADIO_OPTIONS = [
 ] as const;
 
 // 响应式状态
-const tableRef = ref<VxeTableInstance<ElementData>>();
+const tableRef = ref();
 const currentFilter = ref<FilterType>("role");
 const currentRow = ref<ElementData>();
 const scriptList = ref<ScriptItem[]>([]);
 const projectElements = ref<ElementData[]>([]);
+const selectedRowKeys = ref<(string | number)[]>([]);
 
 const addDialogShow = ref(false);
 const imageDialogShow = ref(false);
 const batchShow = ref(false);
 const batchGenerateImageLoading = ref(false);
 const batchGeneratePromptLoading = ref(false);
+
+// 表格列配置
+const tableColumns = computed<PrimaryTableCol<any>[]>(() => {
+  const columns: PrimaryTableCol<ElementData>[] = [];
+
+  // 选择列
+  if (props.way) {
+    columns.push({
+      colKey: "row-select",
+      type: props.way === "radio" ? "single" : "multiple",
+      title: "请选择",
+      width: 100,
+    });
+  }
+
+  // 基础列
+  columns.push(
+    { colKey: "name", title: "名称", width: 150, ellipsis: true },
+    { colKey: "filePath", title: "元素图片", width: 120, cell: "filePath" },
+    { colKey: "intro", title: "详情", ellipsis: true },
+    { colKey: "prompt", title: "生图提示词", cell: "prompt", ellipsis: !props.batch },
+  );
+
+  // 分镜视频提示词列
+  if (isStoryboard.value) {
+    columns.push({ colKey: "videoPrompt", title: "视频提示词", cell: "videoPrompt", ellipsis: !props.batch });
+  }
+
+  // 备注列
+  columns.push({ colKey: "remark", title: "备注", ellipsis: true });
+
+  // 分镜时长列
+  if (isStoryboard.value) {
+    columns.push({ colKey: "duration", title: "时长(单位：秒)", width: 120 });
+  }
+
+  // 操作列
+  if (!props.batch) {
+    columns.push({ colKey: "operation", title: "操作", width: 150, fixed: "right", cell: "operation" });
+  }
+
+  return columns;
+});
 
 // 计算属性
 const radioOptions = RADIO_OPTIONS;
@@ -314,15 +357,34 @@ const handleBatchGeneratePrompt = async () => {
 };
 
 // 表格操作
-const handleEditClick = (row: ElementData) => {
-  tableRef.value?.setRowHeight(row.id, 300);
-  tableRef.value?.recalculate();
-};
+const handleSelectChange = (
+  value: any[],
+  context: { selectedRowData: any[]; type: string; currentRowKey?: string | number; currentRowData?: any },
+) => {
+  selectedRowKeys.value = value;
 
-const handleCheckedChange = (data: { checked: boolean; row: ElementData }) => emits("checkChange", data);
-const handleRadioChange = (data: { row: ElementData }) => emits("checkChange", { checked: true, row: data.row });
-const handleCheckedAll = (data: { checked: boolean; records: ElementData[] }) =>
-  emits("checkAll", data, currentFilter.value, currentScriptId.value ?? -1);
+  if (props.way === "radio") {
+    if (context.currentRowData) {
+      emits("checkChange", { checked: true, row: context.currentRowData });
+    }
+  } else {
+    if (context.type === "check" || context.type === "uncheck") {
+      emits("checkChange", { checked: context.type === "check", row: context.currentRowData! });
+    } else if (context.type === "check-all" || context.type === "uncheck-all") {
+      emits(
+        "checkAll",
+        { checked: context.type === "check-all", records: context.selectedRowData },
+        currentFilter.value,
+        currentScriptId.value ?? -1,
+      );
+    }
+  }
+
+  // 更新 selectModal
+  if (selectModal.value !== undefined) {
+    selectModal.value = context.selectedRowData;
+  }
+};
 
 // CRUD 操作
 const addElement = () => {
@@ -355,8 +417,20 @@ const deleteFrom = (row: ElementData) => {
 };
 
 // 暴露方法
-const getSelectData = () => (props.way === "radio" ? tableRef.value?.getRadioRecord(true) : tableRef.value?.getCheckboxRecords(true));
-const changeChecked = (data: { id: number }, checked: boolean) => tableRef.value?.setCheckboxRow(data, checked);
+const getSelectData = () => {
+  const selectedData = projectElements.value.filter((item) => selectedRowKeys.value.includes(item.id));
+  return props.way === "radio" ? selectedData[0] : selectedData;
+};
+
+const changeChecked = (data: { id: number }, checked: boolean) => {
+  if (checked) {
+    if (!selectedRowKeys.value.includes(data.id)) {
+      selectedRowKeys.value.push(data.id);
+    }
+  } else {
+    selectedRowKeys.value = selectedRowKeys.value.filter((key) => key !== data.id);
+  }
+};
 
 defineExpose({ getSelectData, changeChecked });
 
@@ -404,7 +478,7 @@ onMounted(() => {
   .noImage {
     width: 100px;
     height: 100px;
-    background-color: #f6f7f9;
+    background-color: var(--ant-color-fill-tertiary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -423,35 +497,35 @@ onMounted(() => {
 
     &:hover {
       border-radius: 999px;
-      background-color: #f0edf5;
+      background-color: var(--ant-color-fill-secondary);
     }
 
     &.edit,
     &.magic {
-      color: #1b61fc;
+      color: var(--ant-color-primary);
     }
 
     &.delete {
-      color: #e7010c;
+      color: var(--ant-color-error);
     }
   }
 
   .empty {
     text-align: center;
     padding: 56px 0;
-    background: #fff;
+    background: var(--ant-color-bg-container);
     border-radius: 16px;
-    border: 1px solid #eee;
+    border: 1px solid var(--ant-color-border-secondary);
 
     .emptyIcon {
       width: 96px;
       height: 96px;
-      background: #f3f4f6;
+      background: var(--ant-color-fill-tertiary);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #aaa;
+      color: var(--ant-color-text-quaternary);
       font-size: 45px;
       margin: 0 auto 18px;
     }
@@ -459,15 +533,23 @@ onMounted(() => {
     .emptyTitle {
       font-size: 17px;
       font-weight: 500;
-      color: #18181b;
+      color: var(--ant-color-text);
       margin-bottom: 7px;
     }
 
     .emptyDesc {
-      color: #888;
+      color: var(--ant-color-text-secondary);
       margin-bottom: 17px;
       font-size: 14px;
     }
+  }
+
+  .text-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    max-width: 200px;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model:open="modalVisible" title="视频详情" width="90vw" :style="{ top: '20px' }" :footer="null" destroyOnClose>
+  <t-dialog v-model:visible="modalVisible" header="视频详情" width="90vw" top="1vh" :footer="false" destroyOnClose>
     <div class="video-detail" v-if="config">
       <!-- 左侧：配置信息和生成按钮 -->
       <div class="left-panel">
@@ -17,10 +17,10 @@
 
         <!-- 生成按钮 -->
         <div class="action-section">
-          <a-button type="primary" size="large" block :loading="isGenerating" @click="handleGenerate">
+          <t-button size="large" block :loading="isGenerating" @click="handleGenerate">
             <template #icon><i-video-two /></template>
             生成视频
-          </a-button>
+          </t-button>
           <p class="action-hint">每次生成可能产生不同的结果，可多次尝试</p>
         </div>
       </div>
@@ -61,9 +61,9 @@
                 </div>
               </div>
               <div class="result-actions">
-                <a-button v-if="config.selectedResultId !== result.id" type="primary" size="small" @click.stop="handleSelectResult(result)">
+                <t-button v-if="config.selectedResultId !== result.id" size="small" @click.stop="handleSelectResult(result)">
                   选择此视频
-                </a-button>
+                </t-button>
                 <span v-else class="selected-badge">
                   <i-check-one theme="filled" :size="14" />
                   已选择
@@ -108,7 +108,7 @@
         <video v-if="currentPlayVideo" ref="videoRef" :src="currentPlayVideo.filePath" controls autoplay class="video-element" />
       </div>
     </a-modal>
-  </a-modal>
+  </t-dialog>
 </template>
 
 <script setup lang="ts">
@@ -289,7 +289,7 @@ onMounted(() => {
     gap: 20px;
 
     .config-section {
-      background: #f9fafb;
+      background: var(--bg-secondary);
       border-radius: 12px;
       padding: 20px;
 
@@ -297,7 +297,7 @@ onMounted(() => {
         margin: 0 0 16px;
         font-size: 16px;
         font-weight: 600;
-        color: #1f2937;
+        color: var(--text-primary);
       }
     }
 
@@ -305,7 +305,7 @@ onMounted(() => {
       .action-hint {
         margin: 10px 0 0;
         font-size: 12px;
-        color: #9ca3af;
+        color: var(--text-tertiary);
         text-align: center;
       }
     }
@@ -322,12 +322,12 @@ onMounted(() => {
       margin: 0 0 16px;
       font-size: 16px;
       font-weight: 600;
-      color: #1f2937;
+      color: var(--text-primary);
 
       .result-count {
         padding: 2px 10px;
-        background: rgba(147, 51, 234, 0.1);
-        color: #9333ea;
+        background: var(--mainColorLight);
+        color: var(--mainColor);
         border-radius: 20px;
         font-size: 12px;
         font-weight: 500;
@@ -340,7 +340,7 @@ onMounted(() => {
       gap: 16px;
 
       .result-card {
-        background: #fff;
+        background: var(--bg-primary);
         border-radius: 12px;
         overflow: hidden;
         border: 2px solid transparent;
@@ -348,8 +348,8 @@ onMounted(() => {
         cursor: pointer;
 
         &:hover {
-          border-color: rgba(147, 51, 234, 0.3);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          border-color: var(--mainColorLight);
+          box-shadow: 0 4px 12px var(--shadow-color);
         }
 
         .video-cover {
@@ -368,13 +368,13 @@ onMounted(() => {
           .video-placeholder {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            background: var(--mainGradientLight);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            color: #9333ea;
+            color: var(--mainColor);
 
             span {
               font-size: 13px;
@@ -385,7 +385,7 @@ onMounted(() => {
           .play-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--overlay-bg);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -402,8 +402,8 @@ onMounted(() => {
             bottom: 8px;
             right: 8px;
             padding: 2px 8px;
-            background: rgba(0, 0, 0, 0.75);
-            color: #fff;
+            background: var(--badge-bg);
+            color: var(--badge-color);
             border-radius: 4px;
             font-size: 11px;
           }
@@ -418,7 +418,7 @@ onMounted(() => {
             display: flex;
             align-items: center;
             gap: 4px;
-            color: #9333ea;
+            color: var(--mainColor);
             font-size: 13px;
             font-weight: 500;
           }
@@ -433,28 +433,28 @@ onMounted(() => {
           gap: 10px;
 
           &.generating {
-            background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+            background: var(--mainGradientLight);
 
             .loading-spinner {
               width: 32px;
               height: 32px;
-              border: 3px solid #e5e7eb;
-              border-top-color: #9333ea;
+              border: 3px solid var(--border-color);
+              border-top-color: var(--mainColor);
               border-radius: 50%;
               animation: spin 1s linear infinite;
             }
 
             span {
-              color: #7c3aed;
+              color: var(--mainColorDark);
               font-size: 13px;
             }
           }
 
           &.failed {
-            background: #fef2f2;
+            background: var(--danger-bg);
 
             span {
-              color: #ef4444;
+              color: var(--danger-color);
               font-size: 13px;
             }
           }
@@ -468,19 +468,19 @@ onMounted(() => {
       align-items: center;
       justify-content: center;
       padding: 60px 20px;
-      background: #f9fafb;
+      background: var(--bg-secondary);
       border-radius: 12px;
-      border: 2px dashed #e5e7eb;
+      border: 2px dashed var(--border-color);
 
       .empty-icon {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+        background: var(--mainGradientLight);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #9333ea;
+        color: var(--mainColor);
         margin-bottom: 16px;
       }
 
@@ -488,13 +488,13 @@ onMounted(() => {
         margin: 0 0 8px;
         font-size: 16px;
         font-weight: 600;
-        color: #374151;
+        color: var(--text-secondary);
       }
 
       .empty-desc {
         margin: 0;
         font-size: 13px;
-        color: #9ca3af;
+        color: var(--text-tertiary);
       }
     }
   }
@@ -505,7 +505,7 @@ onMounted(() => {
     width: 100%;
     max-height: 70vh;
     display: block;
-    background: #000;
+    background: var(--video-bg);
     border-radius: 8px;
   }
 }

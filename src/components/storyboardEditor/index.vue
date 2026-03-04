@@ -1,14 +1,17 @@
 <template>
-  <a-modal
-    v-model:open="modelValue"
+  <t-dialog
+    :visible.sync="modelValue"
     width="60vw"
+    top="1vh"
     :closable="false"
     :maskClosable="false"
     wrapClassName="no-header-margin"
     dialogClass="custom-modal"
-    :afterClose="handleClose">
+    :close-btn="false"
+    :afterClose="handleClose"
+    @cancel="closeModal">
     <!-- 标题栏 -->
-    <template #title>
+    <template #header>
       <a-flex justify="space-between" align="center" class="modal-header">
         <a-typography-title :level="4" style="margin: 0">镜头编辑器</a-typography-title>
         <a-button type="text" @click="closeModal">
@@ -83,7 +86,12 @@
 
       <!-- 中间面板 - 生成结果 -->
       <a-flex vertical class="middle-panel">
-        <a-card title="镜头提示词" :bordered="false" size="small" style="margin-bottom: 20px" v-if="mockStoryboard.prompt">
+        <a-card
+          title="镜头提示词"
+          :bordered="false"
+          size="small"
+          style="margin-bottom: 20px; color: var(--ant-primary-color)"
+          v-if="mockStoryboard.prompt">
           {{ mockStoryboard.prompt }}
         </a-card>
         <a-card title="生成结果" :bordered="false" size="small">
@@ -93,18 +101,18 @@
                 <div :class="['image-card-wrapper', { 'image-selected': resultSelectedIndex === index }]" @click="resultSelectedIndex = index">
                   <a-image :preview="false" :src="item.filePath || ''" :fallback="errorPictrue" class="scene-image" />
                   <div class="image-actions">
-                    <a-popconfirm title="确定要删除这张图片吗？" ok-text="确定" cancel-text="取消" @confirm="delResult(index)">
-                      <a-button type="text" size="small" danger @click.stop>
+                    <t-popconfirm content="确定要删除这张图片吗？" ok-text="确定" cancel-text="取消" @confirm="delResult(index)">
+                      <t-button size="small" danger @click.stop>
                         <template #icon>
                           <i-close-one theme="outline" size="16" fill="#E60076" />
                         </template>
-                      </a-button>
-                    </a-popconfirm>
-                    <a-button v-if="item.filePath" type="text" size="small" @click.stop="startPreview(item.filePath)">
+                      </t-button>
+                    </t-popconfirm>
+                    <t-button v-if="item.filePath" size="small" @click.stop="startPreview(item.filePath)">
                       <template #icon>
                         <i-preview-open theme="outline" size="16" fill="#9913FA" />
                       </template>
-                    </a-button>
+                    </t-button>
                   </div>
                   <div v-if="resultSelectedIndex === index" class="selected-overlay">
                     <i-check theme="outline" size="70" fill="#4deb23" strokeLinejoin="bevel" />
@@ -125,7 +133,7 @@
         <a-button size="large" type="primary" @click="handleSaveFirstFrame">保存</a-button>
       </a-flex>
     </template>
-  </a-modal>
+  </t-dialog>
 
   <!-- 图片预览 -->
   <a-image
@@ -379,14 +387,30 @@ defineExpose({
 
 <style lang="scss" scoped>
 .modal-header {
-  background: #f9faff;
+  background: var(--td-bg-color-container);
   height: 60px;
   padding: 0 24px;
+  width: 100%;
+  border-bottom: 1px solid var(--td-component-border);
+
+  :deep(.ant-typography) {
+    color: var(--td-text-color-primary);
+    margin: 0;
+  }
+
+  :deep(.ant-btn-text) {
+    color: var(--td-brand-color);
+
+    &:hover {
+      background: var(--td-bg-color-component-hover);
+      color: var(--td-brand-color-hover);
+    }
+  }
 }
 
 .modal-content {
   height: 70vh;
-  background: #f3f4f6;
+  background: var(--td-bg-color-page);
   min-width: 800px;
 }
 
@@ -396,6 +420,24 @@ defineExpose({
   padding: 12px 6px;
   overflow-y: auto;
   box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--td-bg-color-component);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--td-scrollbar-color);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--td-scrollbar-hover-color);
+    }
+  }
 }
 
 .image-card-wrapper {
@@ -403,12 +445,15 @@ defineExpose({
   aspect-ratio: 1 / 1;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--td-component-border);
   cursor: pointer;
-  background: #fafafa;
+  background: var(--td-bg-color-component);
   text-align: center;
+  transition: all 0.2s ease;
+
   &:hover {
-    border-color: #9913fa;
+    border-color: var(--td-brand-color);
+    box-shadow: 0 2px 8px var(--td-shadow-1);
 
     .image-actions {
       opacity: 1;
@@ -426,6 +471,9 @@ defineExpose({
   right: 4px;
   bottom: 4px;
   margin: 0;
+  background: var(--td-brand-color-1);
+  color: var(--td-brand-color);
+  border: 1px solid var(--td-brand-color-2);
 }
 
 .image-actions {
@@ -443,12 +491,20 @@ defineExpose({
   padding: 2px;
 
   .ant-btn {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--td-bg-color-container);
     border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--td-shadow-1);
 
     &:hover {
-      background: rgba(255, 255, 255, 1);
+      background: var(--td-bg-color-component-hover);
+    }
+
+    &.ant-btn-dangerous {
+      color: var(--td-error-color);
+
+      &:hover {
+        background: var(--td-error-color-1);
+      }
     }
   }
 }
@@ -458,21 +514,22 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed #d9d9d9;
+  border: 1px dashed var(--td-component-border);
   border-radius: 8px;
   cursor: pointer;
-  background: #fafafa;
+  background: var(--td-bg-color-component);
   transition: all 0.2s;
+  color: var(--td-brand-color);
 
   &:hover {
-    border-color: #9810fa;
-    background: #f5f0ff;
+    border-color: var(--td-brand-color);
+    background: var(--td-brand-color-1);
   }
 }
 
 .image-selected {
-  border: 2px solid #9913fa;
-  box-shadow: 0 0 8px rgba(153, 19, 250, 0.3);
+  border: 2px solid var(--td-brand-color);
+  box-shadow: 0 0 8px var(--td-brand-color-1);
 }
 
 .selected-overlay {
@@ -481,35 +538,159 @@ defineExpose({
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(128, 128, 128, 0.5);
+  background-color: var(--td-mask-active);
   display: flex;
   align-items: center;
   justify-content: center;
+
+  :deep(svg) {
+    color: var(--td-success-color);
+  }
 }
 
 .modal-footer {
   padding: 16px;
-}
+  border-top: 1px solid var(--td-component-border);
+  background: var(--td-bg-color-container);
 
-:deep(.ant-card-head) {
-  min-height: auto;
-  padding: 8px 12px;
+  :deep(.ant-btn) {
+    &:not(.ant-btn-primary) {
+      background: var(--td-bg-color-container);
+      border: 1px solid var(--td-component-border);
+      color: var(--td-text-color-secondary);
 
-  .ant-card-head-title {
-    font-size: 14px;
-    font-weight: 600;
-    padding: 0;
+      &:hover {
+        background: var(--td-bg-color-component-hover);
+        color: var(--td-text-color-primary);
+        border-color: var(--td-brand-color);
+      }
+    }
+
+    &.ant-btn-primary {
+      background: var(--td-brand-color);
+      border: none;
+      color: var(--td-text-color-anti);
+
+      &:hover {
+        background: var(--td-brand-color-hover);
+      }
+    }
   }
 }
 
-:deep(.ant-card-body) {
-  padding: 12px;
+:deep(.ant-card) {
+  background: var(--td-bg-color-container);
+  border: 1px solid var(--td-component-border);
+  border-radius: 8px;
+
+  .ant-card-head {
+    min-height: auto;
+    padding: 8px 12px;
+    background: var(--td-bg-color-component);
+    border-bottom: 1px solid var(--td-component-border);
+
+    .ant-card-head-title {
+      font-size: 14px;
+      font-weight: 600;
+      padding: 0;
+      color: var(--td-text-color-primary);
+    }
+  }
+
+  .ant-card-body {
+    padding: 12px;
+  }
 }
+
 :deep(.ant-image) {
   height: 100% !important;
+
   img {
     height: 100% !important;
     object-fit: cover;
   }
+}
+
+:deep(.ant-mentions) {
+  background: var(--td-bg-color-container);
+  border-color: var(--td-component-border);
+  color: var(--td-text-color-primary);
+
+  &:hover,
+  &:focus {
+    border-color: var(--td-brand-color);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px var(--td-brand-color-1);
+  }
+
+  textarea {
+    background: transparent;
+    color: var(--td-text-color-primary);
+
+    &::placeholder {
+      color: var(--td-text-color-placeholder);
+    }
+  }
+}
+
+:deep(.ant-btn-primary) {
+  background: var(--td-brand-color);
+  border: none;
+  color: var(--td-text-color-anti);
+
+  &:hover {
+    background: var(--td-brand-color-hover);
+  }
+
+  &:disabled {
+    background: var(--td-bg-color-component-disabled);
+    color: var(--td-text-color-disabled);
+  }
+}
+
+:deep(.ant-empty) {
+  .ant-empty-description {
+    color: var(--td-text-color-placeholder);
+  }
+}
+
+:deep(.ant-divider-vertical) {
+  background: var(--td-component-border);
+  margin: 0 12px;
+}
+
+:deep(.ant-popconfirm) {
+  .ant-popover-inner {
+    background: var(--td-bg-color-container);
+    border: 1px solid var(--td-component-border);
+  }
+
+  .ant-popover-message-title {
+    color: var(--td-text-color-primary);
+  }
+
+  .ant-btn-primary {
+    background: var(--td-brand-color);
+
+    &:hover {
+      background: var(--td-brand-color-hover);
+    }
+  }
+
+  .ant-btn-default {
+    border-color: var(--td-component-border);
+    color: var(--td-text-color-secondary);
+
+    &:hover {
+      border-color: var(--td-brand-color);
+      color: var(--td-brand-color);
+    }
+  }
+}
+
+:deep(.ant-tag) {
+  border: none;
 }
 </style>

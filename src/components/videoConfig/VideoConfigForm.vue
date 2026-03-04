@@ -3,11 +3,11 @@
     <!-- 厂商选择 -->
     <div class="form-row" v-if="editable">
       <label>模型</label>
-      <a-select v-model:value="localConfig.aiConfigId" @change="onManufacturerChange" :disabled="selectManfactDis" size="small">
-        <a-select-option v-for="item in availableManufacturers" :key="item.value" :value="item.value">
+      <t-select v-model:value="localConfig.aiConfigId" @change="onManufacturerChange" :disabled="selectManfactDis" size="small">
+        <t-option v-for="item in availableManufacturers" :value="item.value" :label="item.label" :key="item.value">
           {{ item.label }}
-        </a-select-option>
-      </a-select>
+        </t-option>
+      </t-select>
     </div>
     <div class="form-row" v-else>
       <label>模型</label>
@@ -16,11 +16,11 @@
     <!-- 模式选择 -->
     <div class="form-row" v-if="editable">
       <label>模式</label>
-      <a-radio-group v-model:value="localConfig.mode" @change="onModeChange" size="small">
-        <a-radio v-for="mode in getModeOptions(localConfig.manufacturer, localConfig.model)" :key="mode.value" :value="mode.value">
+      <t-radio-group v-model:value="localConfig.mode" @change="onModeChange" size="small">
+        <t-radio v-for="mode in getModeOptions(config.manufacturer, config.model)" :key="mode.value" :value="mode.value">
           {{ mode.label }}
-        </a-radio>
-      </a-radio-group>
+        </t-radio>
+      </t-radio-group>
     </div>
     <div class="form-row" v-else>
       <label>模式</label>
@@ -35,9 +35,9 @@
           <div class="frame-box" :class="{ 'has-image': localConfig.startFrame }" @click="openSelector('start')">
             <template v-if="localConfig.startFrame">
               <img :src="localConfig.startFrame.filePath" />
-              <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="removeStartFrame">
+              <t-button class="remove-btn" v-if="editable" size="small" @click.stop="removeStartFrame">
                 <close-outlined />
-              </a-button>
+              </t-button>
               <span class="frame-label">首帧</span>
             </template>
             <template v-else>
@@ -48,9 +48,9 @@
           <div class="frame-box" :class="{ 'has-image': localConfig.endFrame }" @click="openSelector('end')">
             <template v-if="localConfig.endFrame">
               <img :src="localConfig.endFrame.filePath" />
-              <a-button v-if="editable" class="remove-btn" type="text" size="small" @click.stop="removeEndFrame">
+              <t-button v-if="editable" class="remove-btn" size="small" @click.stop="removeEndFrame">
                 <close-outlined />
-              </a-button>
+              </t-button>
               <span class="frame-label">尾帧</span>
             </template>
             <template v-else>
@@ -136,11 +136,11 @@
     <!-- 分辨率/比例 -->
     <div class="form-row" v-if="getResolutionOptions(localConfig.manufacturer, localConfig.model).length">
       <label>{{ getResolutionLabel(localConfig.manufacturer, localConfig.model) }}</label>
-      <a-select v-if="editable" v-model:value="localConfig.resolution" size="small" style="flex: 1" @change="emitChange">
-        <a-select-option v-for="res in getResolutionOptions(localConfig.manufacturer, localConfig.model)" :key="res.value" :value="res.value">
+      <t-select v-if="editable" v-model:value="localConfig.resolution" size="small" style="flex: 1" @change="emitChange">
+        <t-option v-for="res in getResolutionOptions(localConfig.manufacturer, localConfig.model)" :key="res.value" :value="res.value">
           {{ res.label }}
-        </a-select-option>
-      </a-select>
+        </t-option>
+      </t-select>
       <span v-else class="value">{{ getResolutionDisplayLabel(localConfig.manufacturer, localConfig.model, localConfig.resolution) }}</span>
     </div>
 
@@ -148,22 +148,22 @@
     <div class="form-row">
       <label>时长</label>
       <template v-if="getDurationOptions(localConfig.manufacturer, localConfig.model).length > 0">
-        <a-select v-if="editable" v-model:value="localConfig.duration" size="small" style="width: 100px" @change="emitChange">
-          <a-select-option v-for="dur in getDurationOptions(localConfig.manufacturer, localConfig.model)" :key="dur.value" :value="dur.value">
+        <t-select v-if="editable" v-model:value="localConfig.duration" size="small" style="width: 100px" @change="emitChange">
+          <t-option v-for="dur in getDurationOptions(localConfig.manufacturer, localConfig.model)" :key="dur.value" :value="dur.value">
             {{ dur.label }}
-          </a-select-option>
-        </a-select>
+          </t-option>
+        </t-select>
         <span v-else class="value">{{ localConfig.duration }}秒</span>
       </template>
       <template v-else>
         <template v-if="editable">
-          <a-input-number
+          <t-input-number
             v-model:value="localConfig.duration"
             :min="getDurationRange(localConfig.manufacturer, localConfig.model).min"
             :max="getDurationRange(localConfig.manufacturer, localConfig.model).max"
             :step="getDurationRange(localConfig.manufacturer, localConfig.model).step"
             size="small"
-            style="width: 70px"
+            style="width: 160px"
             @change="emitChange" />
           <span class="unit">秒</span>
           <span class="tip">{{ getDurationTip(localConfig.manufacturer, localConfig.model) }}</span>
@@ -181,10 +181,10 @@
     <div class="form-row prompt-row">
       <div class="prompt-header">
         <label>提示词</label>
-        <a-button type="link" size="small" :loading="promptLoading" @click="generatePrompt" class="magic-btn">
+        <t-button size="small" :loading="promptLoading" @click="generatePrompt" class="magic-btn">
           <template #icon><i-magic /></template>
           润色
-        </a-button>
+        </t-button>
       </div>
       <a-textarea v-model:value="localConfig.prompt" :rows="3" placeholder="描述视频内容、运动方式等" size="small" @change="emitChange" />
     </div>
@@ -225,7 +225,7 @@ import {
   getDurationTip,
   getMaxImages,
   getAudioSupport,
-  getModelList
+  getModelList,
 } from "./manufacturerConfig";
 
 const props = withDefaults(
@@ -441,9 +441,9 @@ onMounted(async () => {
     }
   }
 });
-onMounted(() =>{
-  getModelList()
-})
+onMounted(() => {
+  getModelList();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -461,12 +461,12 @@ onMounted(() =>{
       width: 70px;
       flex-shrink: 0;
       font-size: 13px;
-      color: #6b7280;
+      color: var(--text-secondary);
       line-height: 24px;
     }
 
     .value {
-      color: #1f2937;
+      color: var(--text-primary);
       font-size: 13px;
       font-weight: 500;
     }
@@ -474,13 +474,13 @@ onMounted(() =>{
     .unit {
       margin-left: 6px;
       font-size: 12px;
-      color: #6b7280;
+      color: var(--text-secondary);
     }
 
     .tip {
       margin-left: 8px;
       font-size: 11px;
-      color: #9ca3af;
+      color: var(--text-tertiary);
     }
 
     &.frame-row {
@@ -511,10 +511,10 @@ onMounted(() =>{
         .magic-btn {
           padding: 0;
           height: auto;
-          color: #9333ea;
+          color: var(--mainColor);
 
           &:hover {
-            color: #7c3aed;
+            color: var(--mainColorDark);
           }
         }
       }
@@ -530,8 +530,8 @@ onMounted(() =>{
     width: 150px;
     height: auto;
     min-height: 70px;
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
+    border: 1px dashed var(--td-border-level-1-color);
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -540,9 +540,9 @@ onMounted(() =>{
     transition: all 0.2s;
     position: relative;
     overflow: hidden;
-    background: #fafafa;
-    font-size: 11px;
-    color: #999;
+    background: var(--td-bg-color-container);
+    font-size: 10px;
+    color: var(--td-text-color);
 
     &.single-frame {
       width: 100px;
@@ -551,7 +551,7 @@ onMounted(() =>{
 
     &:hover {
       border-color: #1890ff;
-      background: #e6f7ff;
+      background: var(--td-bg-color);
     }
 
     &.has-image {
@@ -573,14 +573,14 @@ onMounted(() =>{
         color: #fff;
         font-size: 10px;
         text-align: center;
-        padding: 2px 0;
+        padding: 1px 0;
       }
 
       .remove-btn {
         position: absolute;
         top: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.9);
+        background: var(--bg-overlay, rgba(255, 255, 255, 0.9));
         border-radius: 0 0 0 4px;
         width: 18px;
         height: 18px;
@@ -591,6 +591,7 @@ onMounted(() =>{
         opacity: 0;
         transition: opacity 0.2s;
         font-size: 11px;
+        z-index: 10;
       }
 
       &:hover .remove-btn {
@@ -654,7 +655,7 @@ onMounted(() =>{
         position: absolute;
         top: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.9);
+        background: var(--bg-overlay, rgba(255, 255, 255, 0.9));
         border-radius: 0 0 0 4px;
         width: 18px;
         height: 18px;
@@ -665,6 +666,7 @@ onMounted(() =>{
         opacity: 0;
         transition: opacity 0.2s;
         font-size: 11px;
+        z-index: 10;
       }
 
       &:hover .remove-btn {
@@ -674,21 +676,21 @@ onMounted(() =>{
 
     .ghost {
       opacity: 0.5;
-      background: #c8ebfb;
+      background: var(--mainColorLight);
     }
 
     .add-image-box {
       width: 150px;
       height: 70px;
       border: 1px dashed #d9d9d9;
-      border-radius: 6px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s;
       background: #fafafa;
-      font-size: 14px;
+      font-size: 12px;
       color: #999;
 
       &:hover {

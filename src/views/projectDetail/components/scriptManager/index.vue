@@ -160,12 +160,11 @@ onMounted(getScriptData);
     .smTitle {
       font-size: 22px;
       font-weight: 600;
-      color: #222;
       margin-bottom: 8px;
     }
 
     .smSub {
-      color: #888;
+      color: #a19f9f;
       font-size: 15px;
     }
   }
@@ -176,7 +175,6 @@ onMounted(getScriptData);
 
     .newStoryboard {
       margin-bottom: 1rem;
-
       .noneScripts {
         height: 400px;
         text-align: center;
