@@ -168,10 +168,6 @@ function delStoryboardsFn(id: number, index: number, event: MouseEvent) {
         background: var(--td-brand-color);
         border-radius: 10px;
         box-shadow: 0 4px 12px var(--td-shadow-1);
-
-        .icon {
-          color: var(--td-text-color-anti);
-        }
       }
 
       .count {
