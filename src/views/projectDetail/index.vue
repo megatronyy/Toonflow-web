@@ -39,10 +39,10 @@
     </div>
     <!-- main -->
     <div class="main">
-      <!-- <overview v-if="currentSubView === 'overview'" />
-      <originalText v-if="currentSubView === 'originalText'" />
-      <outlineManager v-if="currentSubView === 'outline'" />
-      <assetsManager v-if="currentSubView === 'assets'" /> -->
+      <!-- <overview v-if="currentSubView === 'overview'" /> -->
+      <originalNovalText v-if="currentSubView === 'originalNovalText'" />
+      <!-- <outlineManager v-if="currentSubView === 'outline'" /> -->
+      <!-- <assetsManager v-if="currentSubView === 'assets'" /> -->
       <scriptManager v-if="currentSubView === 'script'" />
     </div>
     <myTask v-model="visible" />
@@ -53,7 +53,7 @@
 import dayjs from "dayjs";
 import store from "@/stores";
 // import overview from "./components/overview/index.vue";
-// import originalText from "./components/originalText/index.vue";
+import originalNovalText from "./components/originalNovalText/index.vue";
 // import outlineManager from "./components/outlineManager/index.vue";
 // import assetsManager from "./components/assetsManager/index.vue";
 import scriptManager from "./components/scriptManager/index.vue";
@@ -70,11 +70,11 @@ onMounted(async () => {
 
 const router = useRouter();
 
-type SubView = "overview" | "originalText" | "outline" | "assets" | "script";
+type SubView = "overview" | "originalNovalText" | "outline" | "assets" | "script";
 
 const subNavItems = [
   { id: "overview" as SubView, label: "项目概览", icon: "i-more-app" },
-  { id: "originalText" as SubView, label: "小说原文", icon: "i-file-text" },
+  { id: "originalNovalText" as SubView, label: "小说原文", icon: "i-file-text" },
   { id: "outline" as SubView, label: "大纲管理", icon: "i-mindmap-list" },
   { id: "script" as SubView, label: "剧本管理", icon: "i-ad-product" },
   { id: "assets" as SubView, label: "资产管理", icon: "i-data-file" },
