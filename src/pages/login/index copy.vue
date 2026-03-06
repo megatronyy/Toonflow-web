@@ -1,30 +1,57 @@
 <template>
+  <div class="bg"></div>
   <div class="loginPage">
     <div class="formBox">
+      <!-- 右下角设置按钮 -->
       <!-- 设置弹窗 -->
-      <t-dialog v-model:visible="showSettingModal" header="服务器设置" @confirm="handleSaveSetting" :width="400">
-        <t-form label-width="80px">
-          <t-form-item label="请求地址">
-            <t-input v-model="tempBaseUrl" placeholder="http://localhost:60000" />
-          </t-form-item>
-          <t-form-item label="WS地址">
-            <t-input v-model="tempWsBaseUrl" placeholder="ws://localhost:60000" />
-          </t-form-item>
-        </t-form>
-      </t-dialog>
-      <div class="logoBox fc">
-        <img :src="logo" alt="logo" class="logoImg" />
-        <div class="fc c">
-          <span class="logoText">ToonFlow</span>
-          <span class="slogan">智能短剧创作平台</span>
-        </div>
+      <a-modal v-model:open="showSettingModal" title="服务器设置" @ok="handleSaveSetting" :width="400">
+        <a-form :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+          <a-form-item label="请求地址">
+            <a-input v-model:value="tempBaseUrl" placeholder="http://localhost:60000" />
+          </a-form-item>
+          <a-form-item label="WS地址">
+            <a-input v-model:value="tempWsBaseUrl" placeholder="ws://localhost:60000" />
+          </a-form-item>
+        </a-form>
+      </a-modal>
+      <div class="logoBox">
+        <img :src="logo" alt="logo" class="logo-img" />
+        <span class="logo-text">Toonflow</span>
       </div>
-      <div class="login-form">
-        <t-input v-model="state.user.username" placeholder="用户名" autocomplete="username" size="large"></t-input>
-        <t-input v-model="state.user.password" type="password" placeholder="密码" size="large"></t-input>
-        <t-button class="loginBtn" theme="primary" size="large" :loading="state.loginLoading" @click="handleLogin" block>登录</t-button>
-      </div>
-      <div class="tips c">默认账号：admin / admin123</div>
+      <a-form :model="state.user" :rules="state.rules" ref="ruleFormRef" @finish="handleFinish" class="login-form">
+        <a-form-item name="username">
+          <a-input v-model:value="state.user.username" placeholder="请输入账号" autocomplete="username" size="large">
+            <template #prefix>
+              <i-people theme="outline" class="input-icon" />
+            </template>
+          </a-input>
+        </a-form-item>
+        <a-form-item name="password">
+          <a-input-password v-model:value="state.user.password" placeholder="请输入密码" size="large">
+            <template #prefix>
+              <i-lock theme="outline" class="input-icon" />
+            </template>
+          </a-input-password>
+        </a-form-item>
+        <a-form-item>
+          <a-button class="loginBtn" type="primary" size="large" :loading="state.loginLoading" html-type="submit" block>登录</a-button>
+        </a-form-item>
+      </a-form>
+      <a-alert v-if="showHint" class="default-hint" type="info" closable @close="showHint = false">
+        <template #message>
+          <div class="hint-content">
+            <p>
+              默认账号：
+              <code>admin</code>
+            </p>
+            <p>
+              默认密码：
+              <code>admin123</code>
+            </p>
+            <p>登录后可在设置中修改</p>
+          </div>
+        </template>
+      </a-alert>
     </div>
   </div>
   <div class="settingBtn" @click="showSettingModal = true">
@@ -39,7 +66,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import Router from "@/router/index.ts";
-import { MessagePlugin } from "tdesign-vue-next";
+import { Alert, message } from "ant-design-vue";
 import logo from "@/assets/logo.png";
 import axios from "@/utils/axios";
 import settingStore from "@/stores/setting";
@@ -59,7 +86,7 @@ const handleSaveSetting = () => {
   baseUrl.value = tempBaseUrl.value;
   wsBaseUrl.value = tempWsBaseUrl.value;
   showSettingModal.value = false;
-  MessagePlugin.success("设置已保存");
+  message.success("设置已保存");
 };
 const state = ref({
   show: true,
@@ -83,25 +110,21 @@ const captcha = ref();
 onMounted(() => {
   resSvg();
 });
-const handleLogin = () => {
-  if (!state.value.user.username || !state.value.user.password) {
-    MessagePlugin.warning("请输入账号和密码");
-    return;
-  }
+const handleFinish = (values) => {
   state.value.loginLoading = true;
-  const obj = { ...state.value.user };
+  const obj = { ...values };
   axios
     .post("/other/login", obj)
     .then(({ data }) => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.id);
       Router.push("/project");
-      MessagePlugin.success("登录成功");
+      message.success("登录成功");
       state.value.loginLoading = false;
     })
     .catch((e) => {
       state.value.loginLoading = false;
-      MessagePlugin.error(e.message);
+      message.error(e.message);
       resSvg();
     });
 };
@@ -115,20 +138,32 @@ const resSvg = async () => {
 </script>
 
 <style lang="scss" scoped>
+.bg {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background-image: url("@/assets/bg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .loginPage {
+  z-index: 999;
   width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #eeeeee;
+  position: relative;
 
   .formBox {
     width: 380px;
     padding: 40px 40px 30px;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
 
     .logoBox {
       display: flex;
@@ -137,34 +172,37 @@ const resSvg = async () => {
       margin-bottom: 30px;
       gap: 12px;
 
-      .logoImg {
-        width: 64px;
-        height: 64px;
+      .logo-img {
+        width: 48px;
+        height: 48px;
       }
 
-      .logoText {
-        font-size: 36px;
-        font-weight: 800;
+      .logo-text {
+        font-size: 28px;
+        font-weight: 600;
         color: #333;
         letter-spacing: 1px;
-      }
-      .slogan {
-        opacity: 0.5;
       }
     }
 
     .login-form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-
       .input-icon {
         color: #999;
         font-size: 18px;
       }
 
-      :deep(.t-input) {
+      :deep(.ant-input-affix-wrapper) {
+        padding: 8px 12px;
         border-radius: 8px;
+
+        &:hover,
+        &:focus-within {
+          border-color: var(--mainColor);
+        }
+      }
+
+      :deep(.ant-form-item) {
+        margin-bottom: 20px;
       }
     }
 
@@ -182,18 +220,13 @@ const resSvg = async () => {
       }
     }
   }
-  .tips {
-    opacity: 0.5;
-    font-size: 12px;
-    margin-top: 18px;
-  }
 }
 
 .default-hint {
   margin-top: 20px;
   border-radius: 8px;
 
-  :deep(.t-alert__message) {
+  :deep(.ant-alert-message) {
     width: 100%;
   }
 
