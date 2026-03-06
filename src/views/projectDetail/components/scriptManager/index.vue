@@ -87,7 +87,7 @@
           <div class="cardFooter jb ac">
             <div class="footerItem">
               <i-time :size="14" class="footerIcon" />
-              <span class="footerText">{{ formatTime(item.createTime) }}</span>
+              <span class="footerText">{{ dayjs(item.createTime).format("YYYY-MM-DD") }}</span>
             </div>
             <div class="deleteBtn" @click.stop="handleDeleteScript(item.id)" title="删除剧本">
               <i-delete :size="18" />
@@ -147,25 +147,6 @@ function handleScriptClick(item: Script) {
   selectedScript.value = { ...item };
   detailsShow.value = true;
 }
-
-// 格式化时间
-function formatTime(timestamp?: number) {
-  if (!timestamp) return "未知时间";
-  const now = dayjs();
-  const time = dayjs(timestamp);
-  const diffDays = now.diff(time, "day");
-  
-  if (diffDays === 0) {
-    return time.format("HH:mm");
-  } else if (diffDays === 1) {
-    return "昨天";
-  } else if (diffDays < 7) {
-    return `${diffDays}天前`;
-  } else {
-    return time.format("YYYY-MM-DD");
-  }
-}
-
 // 搜索剧本
 async function searchScripts() {
   try {

@@ -1,7 +1,15 @@
 <template>
   <div class="addScript">
-    <t-dialog :visible.sync="addScriptShow" width="60vw" top="1vh" :closable="false" :maskClosable="false"
-      wrapClassName="no-header-margin" dialogClass="custom-modal" :close-btn="false" @close-btn-click="handleCancel">
+    <t-dialog
+      :visible.sync="addScriptShow"
+      width="60vw"
+      top="1vh"
+      :closable="false"
+      :maskClosable="false"
+      wrapClassName="no-header-margin"
+      dialogClass="custom-modal"
+      :close-btn="false"
+      @close-btn-click="handleCancel">
       <template #header>
         <div class="titHeader">
           <div class="titleWrapper">
@@ -19,8 +27,14 @@
         </div>
         <div class="upload">
           <div class="upload-area" @click="triggerUpload" @dragover.prevent @drop.prevent="handleDrop">
-            <t-upload ref="uploadRef" v-model="fileList" theme="file" :multiple="false" :max="1"
-              :before-upload="handleBeforeUpload" style="display: none" />
+            <t-upload
+              ref="uploadRef"
+              v-model="fileList"
+              theme="file"
+              :multiple="false"
+              :max="1"
+              :before-upload="handleBeforeUpload"
+              style="display: none" />
             <div class="dragIcon">
               <i-upload-one theme="outline" size="32" fill="var(--td-brand-color)" />
             </div>
@@ -29,8 +43,13 @@
           </div>
         </div>
         <div class="content">
-          <textarea v-model="scriptData" class="notebook-textarea" placeholder="请上传剧本内容..." spellcheck="false"
-            @input="handleInput" :ref="setTextareaRef"></textarea>
+          <textarea
+            v-model="scriptData"
+            class="notebook-textarea"
+            placeholder="请上传剧本内容..."
+            spellcheck="false"
+            @input="handleInput"
+            :ref="setTextareaRef"></textarea>
         </div>
       </div>
       <template #footer>
@@ -251,7 +270,6 @@ $line-height: 28px;
       border-radius: 8px;
       transition: all 0.2s;
       color: var(--td-text-color-secondary);
-
       &:hover {
         background: var(--td-bg-color-component-hover);
         color: var(--td-text-color-primary);
@@ -319,10 +337,12 @@ $line-height: 28px;
         background: transparent;
         color: var(--td-text-color-primary);
         font-family: "KaiTi", "STKaiti", "PingFang SC", sans-serif;
-        background-image: repeating-linear-gradient(transparent,
-            transparent calc($line-height - 1px),
-            var(--td-component-border) calc($line-height - 1px),
-            var(--td-component-border) $line-height );
+        background-image: repeating-linear-gradient(
+          transparent,
+          transparent calc($line-height - 1px),
+          var(--td-component-border) calc($line-height - 1px),
+          var(--td-component-border) $line-height
+        );
         background-position: 0 12px;
 
         &::placeholder {
