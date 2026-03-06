@@ -17,7 +17,6 @@
           <loginConfig v-else-if="activeMenu === 'login'" />
           <aiConfog v-else-if="activeMenu === 'ai'" />
           <videoModelConfig v-else-if="activeMenu === 'video'" />
-          <promptsEdit v-else-if="activeMenu === 'prompts'" />
           <otherConfig v-else-if="activeMenu === 'other'" />
           <dbConfig v-else-if="activeMenu === 'db'" />
           <about v-else-if="activeMenu === 'about'" />
@@ -38,7 +37,6 @@ import requestConfig from "./components/requestConfig.vue";
 import loginConfig from "./components/loginConfig.vue";
 import aiConfog from "./components/aiConfog.vue";
 import videoModelConfig from "./components/videoModelConfig.vue";
-import promptsEdit from "./components/promptsEdit.vue";
 import dbConfig from "./components/dbConfig.vue";
 import otherConfig from "./components/otherConfig.vue";
 import about from "./components/about.vue";
@@ -50,7 +48,6 @@ const menuItems = [
   { key: "login", label: "登录配置", icon: "lock-on" },
   { key: "ai", label: "语言模型配置", icon: "chat" },
   { key: "video", label: "视频模型配置", icon: "video" },
-  { key: "prompts", label: "提示词配置", icon: "edit" },
   { key: "other", label: "其他配置", icon: "setting" },
   { key: "db", label: "数据库操作", icon: "server" },
   { key: "about", label: "关于", icon: "info-circle" },

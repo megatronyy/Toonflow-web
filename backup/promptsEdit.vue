@@ -57,7 +57,7 @@
           </template>
           <div class="editorBody">
             <t-textarea v-model="editingValue" placeholder="请输入提示词内容" class="promptTextarea" />
-     <span>*{{ hasCustomValue ? '当前使用自定义提示词，点击"一键重置"可恢复默认值' : "当前使用默认提示词，编辑后将保存为自定义值" }}</span>
+            <span class="editorTip">*{{ hasCustomValue ? '当前使用自定义提示词，点击"重置提示词"可恢复默认值' : "当前使用默认提示词，编辑后将保存为自定义值" }}</span>
           </div>
         </t-card>
       </template>
@@ -77,26 +77,17 @@
 import { ref, computed, onMounted } from "vue";
 import { MessagePlugin } from "tdesign-vue-next";
 import axios from "@/utils/axios";
-
-interface Prompt {
-  id: number;
-  code: string;
-  name: string;
-  type: "mainAgent" | "subAgent" | "system";
-  parentCode: string;
-  defaultValue: string;
-  customValue: string;
-}
+import type { Prompt } from "./promptEditDialog.vue";
 
 const promptList = ref<Prompt[]>([]);
 const currentPrompt = ref<Prompt | null>(null);
 const editingValue = ref("");
 const saving = ref(false);
 
-const typeConfig: Record<string, { name: string; color: string; theme: string }> = {
-  system: { name: "系统提示词", color: "green", theme: "success" },
-  mainAgent: { name: "主Agent", color: "purple", theme: "primary" },
-  subAgent: { name: "子Agent", color: "blue", theme: "warning" },
+const typeConfig: Record<string, { name: string; theme: string }> = {
+  system: { name: "系统提示词", theme: "success" },
+  mainAgent: { name: "主Agent", theme: "primary" },
+  subAgent: { name: "子Agent", theme: "warning" },
 };
 
 const groupedPrompts = computed(() => {
@@ -110,6 +101,7 @@ const groupedPrompts = computed(() => {
 });
 
 const currentPromptCode = ref<string>("");
+const processLineBreaks = (value: string) => value?.replace(/\\n/g, "\n") || "";
 
 const hasCustomValue = computed(() => {
   if (!currentPrompt.value) return false;
@@ -120,7 +112,6 @@ const hasCustomValue = computed(() => {
 const getTypeName = (type: string) => typeConfig[type]?.name || type;
 const getTypeTheme = (type: string): "default" | "success" | "primary" | "warning" | "danger" =>
   (typeConfig[type]?.theme as "default" | "success" | "primary" | "warning" | "danger") || "default";
-const processLineBreaks = (value: string) => value?.replace(/\\n/g, "\n") || "";
 
 function onMenuChange(value: string | number) {
   const prompt = promptList.value.find((p) => p.code === value);

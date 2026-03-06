@@ -27,16 +27,25 @@
           <div class="artStylePicker">
             <div class="artStyleHeader">
               <span v-if="formState.artStyle" class="selectedLabel">
-                已选：<t-tag theme="primary" size="small" closable @close="formState.artStyle = ''">{{ formState.artStyle }}</t-tag>
+                已选：
+                <t-tag theme="primary" size="small" closable @close="formState.artStyle = ''">{{ formState.artStyle }}</t-tag>
               </span>
               <span v-else class="selectedHint">请在下方选择画风</span>
             </div>
             <t-tabs v-model="currentArtStyleTab" @change="handleTabChange">
               <t-tab-panel v-for="tab in artStyleTabs" :key="tab" :value="tab" :label="tab">
-                <div v-if="tab === '自定义风格'" class="artStyleContent">
-                  <div class="customizeInput">
-                    <t-input v-model="customizeName" placeholder="请输入自定义影片画风名称" @enter="applyCustomize" />
-                    <t-button theme="primary" style="margin-left: 8px" :disabled="!customizeName" @click="applyCustomize">确定</t-button>
+                <div v-if="tab === '自定义风格'" class="artStyleContent customizeContent">
+                  <div class="customizeInputWrapper">
+                    <div class="customizeInput">
+                      <t-input v-model="customizeName" placeholder="请输入自定义影片画风名称" @enter="applyCustomize" clearable />
+                      <t-button theme="primary" style="margin-left: 8px" :disabled="!customizeName.trim()" @click="applyCustomize">应用</t-button>
+                    </div>
+                    <div v-if="customStyleApplied" class="customizeApplied">
+                      <span class="appliedText">✓ 已应用自定义画风「{{ formState.artStyle }}」</span>
+                    </div>
+                    <div v-else class="customizeHint">
+                      {{ customizeName.trim() ? "按回车键或点击「应用」按钮确认" : "输入自定义画风名称后点击「应用」" }}
+                    </div>
                   </div>
                 </div>
                 <div v-else class="artStyleContent">
@@ -173,6 +182,9 @@ const currentArtStyleTab = ref<string>("常用风格");
 const artStyleOptions = ref<ArtStyleItem[]>([]);
 const artStyleLoading = ref(false);
 const customizeName = ref("");
+const customStyleApplied = computed(() => {
+  return !!customizeName.value.trim() && formState.value.artStyle === customizeName.value.trim();
+});
 
 watch(addProjectShow, (visible) => {
   if (visible) {
@@ -206,7 +218,6 @@ function handleTabChange(tab: string | number) {
 function applyCustomize() {
   if (!customizeName.value.trim()) return;
   formState.value.artStyle = customizeName.value.trim();
-  customizeName.value = "";
 }
 
 function fetchArtStyles() {
@@ -257,9 +268,36 @@ function fetchArtStyles() {
     padding: 4px;
   }
 
+  .customizeContent {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 32px !important;
+  }
+
+  .customizeInputWrapper {
+    width: 100%;
+    max-width: 460px;
+  }
+
   .customizeInput {
     display: flex;
     align-items: center;
+  }
+
+  .customizeApplied {
+    margin-top: 12px;
+
+    .appliedText {
+      font-size: 13px;
+      color: var(--td-success-color);
+    }
+  }
+
+  .customizeHint {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--td-text-color-placeholder);
   }
 }
 

@@ -22,7 +22,7 @@
             <div class="title">
               {{ project.name }}
             </div>
-            <t-tag shape="round">{{ project.type }}</t-tag>
+            <t-tag shape="round">{{ project.artStyle }}</t-tag>
             <div class="intro">
               {{ project.intro }}
             </div>
