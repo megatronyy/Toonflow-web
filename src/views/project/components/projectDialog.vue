@@ -116,7 +116,7 @@ const RATIO_OPTIONS = [
   { value: "9:16", label: "9:16" },
 ];
 
-const ART_STYLE_TABS = ["常用风格", "IP风格", "插画风格", "可爱Q版", "立体风格", "日系风格", "自定义风格"] as const;
+const ART_STYLE_TABS = ["常用风格", "ip风格", "插画风格", "可爱Q版", "立体风格", "日系风格", "自定义风格"] as const;
 const artStyleTabs = ref([...ART_STYLE_TABS]);
 
 const DEFAULT_FORM: () => ProjectFormData & { id: number; era: string; createTime: number; userId: number } = () => ({
