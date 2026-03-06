@@ -11,7 +11,7 @@
       </t-button>
     </div>
     <div class="list">
-      <t-row>
+      <t-row style="gap: 20px">
         <t-col :xs="12" :sm="6" :md="6" :lg="4" :xl="4" v-for="project in allProject" :key="project.id">
           <t-card hoverShadow class="card" @click="openProject(project.id)">
             <div class="title">
