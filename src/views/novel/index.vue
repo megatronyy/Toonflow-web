@@ -1,6 +1,5 @@
 <template>
   <div class="novel">
-    <h2>{{ project?.name }}</h2>
     <t-tabs v-model="activeKey">
       <t-tab-panel value="To1" label="原文">
         <div class="headBtn jb ac">

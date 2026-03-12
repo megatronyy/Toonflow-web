@@ -2,6 +2,7 @@ html,
 body,
 #app {
   margin: 0;
+  background-color: #ebebeb;
 }
 * {
   box-sizing: border-box;

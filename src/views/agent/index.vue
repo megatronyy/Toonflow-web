@@ -1,6 +1,5 @@
 <template>
   <div class="agent">
-    <h2>{{ project?.name }}</h2>
     <div class="data f">
       <div class="operate">
         <div class="title jb ac">

@@ -1,6 +1,7 @@
 <template>
   <div class="request-config">
-    <t-form :data="formData" labelAlign="top" :rules="formRules" @submit="handleSubmit">
+    <t-alert theme="warning" content="请配置 API 和 WebSocket 地址"></t-alert>
+    <t-form :data="formData" labelAlign="top" :rules="formRules">
       <t-form-item label="API 地址" name="baseUrl">
         <t-input v-model="formData.baseUrl" placeholder="请输入 API 请求地址" clearable>
           <template #prefix-icon>
@@ -45,18 +46,18 @@ const formData = ref<RequestForm>({
 const formRules: FormRules<RequestForm> = {
   baseUrl: [
     { required: true, message: "请输入 API 地址", trigger: "blur" },
-    { 
-      pattern: /^https?:\/\/.+/, 
-      message: "请输入有效的 HTTP/HTTPS 地址", 
-      trigger: "blur" 
+    {
+      pattern: /^https?:\/\/.+/,
+      message: "请输入有效的 HTTP/HTTPS 地址",
+      trigger: "blur",
     },
   ],
   wsBaseUrl: [
     { required: true, message: "请输入 WebSocket 地址", trigger: "blur" },
-    { 
-      pattern: /^wss?:\/\/.+/, 
-      message: "请输入有效的 WS/WSS 地址", 
-      trigger: "blur" 
+    {
+      pattern: /^wss?:\/\/.+/,
+      message: "请输入有效的 WS/WSS 地址",
+      trigger: "blur",
     },
   ],
 };

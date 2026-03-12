@@ -13,11 +13,7 @@
           :showArrow="false"
           v-for="(menu, index) in menuList"
           :key="index">
-          <div
-            class="item fc c"
-            v-if="menu.type === 'btn'"
-            :class="{ active: activeMenu == menu.path, disabled: menu.needProject && !project }"
-            @click="handleClick(menu)">
+          <div class="item fc c" v-if="menu.type === 'btn'" :class="{ active: activeMenu == menu.path }" @click="handleClick(menu)">
             <component :is="menu.icon" class="icon" />
           </div>
           <div class="divider" v-if="menu.type === 'divider'"></div>
@@ -33,6 +29,26 @@
       </div>
     </div>
     <div class="view">
+      <div class="topMenu f ac jb" v-if="project?.id">
+        <div class="title">
+          <h2>{{ project?.name || "请选择项目" }}</h2>
+        </div>
+        <div class="rightBtnList f ac">
+          <t-tooltip
+            :content="menu.label"
+            placement="bottom"
+            theme="light"
+            destroyOnClose
+            :showArrow="false"
+            v-for="(menu, index) in rightBtnList"
+            :key="index">
+            <div class="item fc c" v-if="menu.type === 'btn'" :class="{ active: activeMenu == menu.path }" @click="handleClick(menu)">
+              <component :is="menu.icon" class="icon" />
+            </div>
+            <div class="divider" v-if="menu.type === 'divider'"></div>
+          </t-tooltip>
+        </div>
+      </div>
       <router-view />
     </div>
   </div>
@@ -40,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import setting from '@/components/setting/index.vue';
+import setting from "@/components/setting/index.vue";
 
 import projectStore from "@/stores/project";
 const { project } = storeToRefs(projectStore());
@@ -50,14 +66,16 @@ const { showSetting } = storeToRefs(settingStore());
 const menuList = ref([
   { type: "btn", path: "/project", label: "我的项目", icon: "i-folder-close" },
   { type: "btn", path: "/task", label: "任务中心", icon: "i-view-list" },
+  // { type: "divider" },
+]);
+
+const rightBtnList = ref([
+  { type: "btn", path: "/novel", label: "小说原文", icon: "i-notebook" },
+  { type: "btn", path: "/agent", label: "剧本Agent", icon: "i-color-filter" },
+  { type: "btn", path: "/script", label: "剧本管理", icon: "i-document-folder" },
+  { type: "btn", path: "/production", label: "视频生产", icon: "i-carousel-video" },
   { type: "divider" },
-  // { type: "btn", path: "/detail", label: "项目总览", icon: "i-more-app", showTitle: true },
-  { type: "btn", path: "/novel", label: "小说原文", icon: "i-notebook", needProject: true },
-  { type: "btn", path: "/agent", label: "剧本Agent", icon: "i-color-filter", needProject: true },
-  { type: "btn", path: "/script", label: "剧本管理", icon: "i-document-folder", needProject: true },
-  { type: "btn", path: "/production", label: "视频生产", icon: "i-carousel-video", needProject: true },
-  { type: "divider" },
-  { type: "btn", path: "/assets", label: "资产中心", icon: "i-receive", needProject: true },
+  { type: "btn", path: "/assets", label: "资产中心", icon: "i-receive" },
 ]);
 
 const router = useRouter();
@@ -83,12 +101,13 @@ function handleClick(menu: any) {
   height: 100vh;
   width: 100vw;
   padding: 1rem;
-  background-color: #ebebeb;
   display: flex;
 
   .menu {
     width: 64px;
     height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
     background-color: #fff;
     border-radius: 16px;
     padding-top: 1rem;
@@ -109,39 +128,6 @@ function handleClick(menu: any) {
       padding-bottom: 1rem;
       width: 100%;
       height: 100%;
-      .item {
-        margin-bottom: 4px;
-        margin-top: 4px;
-        cursor: pointer;
-        width: 50px;
-        height: 50px;
-        .icon {
-          font-size: 24px;
-        }
-        .title {
-          font-size: 10px;
-          white-space: nowrap;
-        }
-        &:hover {
-          background-color: #ecedef;
-          border-radius: 16px;
-        }
-      }
-      .disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-      }
-      .active {
-        background-color: #000 !important;
-        color: #ebebeb;
-        border-radius: 16px;
-      }
-      .divider {
-        width: 50px;
-        height: 1px;
-        background-color: #ecedef;
-        margin: 8px 0;
-      }
     }
     .footItem {
       width: 100%;
@@ -166,6 +152,19 @@ function handleClick(menu: any) {
       }
     }
   }
+  .menu::-webkit-scrollbar {
+    width: 4px;
+  }
+  .menu::-webkit-scrollbar-thumb {
+    background-color: #d5d5d5;
+    border-radius: 4px;
+    &:hover {
+      background-color: #bbb;
+    }
+  }
+  .menu::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
   .view {
     flex: 1;
     margin-left: 1rem;
@@ -175,8 +174,72 @@ function handleClick(menu: any) {
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-gutter: stable;
     padding-left: 2rem;
     padding-right: 2rem;
+    .topMenu {
+      .rightBtnList {
+        .item {
+          margin-bottom: 0px !important;
+          margin-top: 0px !important;
+          margin-right: 4px;
+          margin-left: 4px;
+        }
+        .divider{
+          width: 1px;
+          height: 24px;
+          background-color: #ecedef;
+          margin: 0 4px;
+        }
+      }
+    }
   }
+  .view::-webkit-scrollbar {
+    width: 6px;
+  }
+  .view::-webkit-scrollbar-thumb {
+    background-color: #d5d5d5;
+    border-radius: 4px;
+    &:hover {
+      background-color: #bbb;
+    }
+  }
+  .view::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+.item {
+  margin-bottom: 4px;
+  margin-top: 4px;
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  .icon {
+    font-size: 24px;
+  }
+  .title {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  &:hover {
+    background-color: #ecedef;
+    border-radius: 16px;
+  }
+}
+// .disabled {
+//   opacity: 0.3;
+//   cursor: not-allowed;
+// }
+.active {
+  background-color: #000 !important;
+  color: #ebebeb;
+  border-radius: 16px;
+}
+.divider {
+  width: 50px;
+  height: 1px;
+  background-color: #ecedef;
+  margin: 8px 0;
 }
 </style>

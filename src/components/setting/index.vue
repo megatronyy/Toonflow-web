@@ -93,4 +93,8 @@ const currentMenuItem = computed(() => menuItems.find((item) => item.key === act
     }
   }
 }
+:deep(.t-menu){
+  padding: 0;
+  padding-right: 8px;
+}
 </style>

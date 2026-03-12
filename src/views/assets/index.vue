@@ -1,6 +1,5 @@
 <template>
   <div class="assets">
-    <h2>{{ project?.name }}</h2>
     <div class="data">
       <t-tabs v-model="assetOptions" @change="selectAssetOptions">
         <t-tab-panel v-for="(item, index) in themeData" :key="index" :value="item.value">

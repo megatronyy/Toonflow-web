@@ -1,6 +1,5 @@
 <template>
   <div class="production">
-    <h2>{{ project?.name }}</h2>
     <t-tabs v-model="setData">
       <t-tab-panel v-for="(item, index) in setContent" :key="index" :value="index + ''" :label="item.title">
         <div class="storyboard">

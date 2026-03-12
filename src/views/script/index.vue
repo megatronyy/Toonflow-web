@@ -1,6 +1,5 @@
 <template>
   <div class="script">
-    <h2>{{ project?.name }}</h2>
     <div class="actionBar">
       <div class="searchWrapper">
         <t-input placeholder="搜索剧本名称..." v-model="searchQuery" @change="onChange" class="searchInput">
