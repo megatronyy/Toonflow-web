@@ -12,11 +12,12 @@
       @cancel="handleCancel">
       <div class="data">
         <t-form :data="formData" :labelWidth="100" labelAlign="top">
-          <t-form-item name="modelName" label="模型名称">
+          <t-form-item name="modelName">
             <t-select v-model="formData.modelName">
-              <t-option key="apple" label="Apple" value="apple" />
-              <t-option key="orange" value="orange">Orange</t-option>
-              <t-option key="banana" label="Banana" value="banana" />
+              <t-option v-for="(item, index) in modelData" :key="index" :value="item.modelName">
+                <span class="modelName">{{ item.modelName }}</span>
+                <span class="modelType" style="margin-left: 10px">{{ item.type }}</span>
+              </t-option>
             </t-select>
           </t-form-item>
         </t-form>
@@ -35,6 +36,20 @@ const props = defineProps<{
     modelName: string;
   };
 }>();
+const modelData = ref([
+  {
+    modelName: "GPT-3.5",
+    type: "文本模型",
+  },
+  {
+    modelName: "GPT-4",
+    type: "图片模型",
+  },
+  {
+    modelName: "Claude",
+    type: "视频模型",
+  },
+]);
 function handleCancel() {
   addModelShow.value = false;
 }

@@ -2,23 +2,17 @@
   <div class="modelServe">
     <div class="modelList">
       <div class="listContent">
-        <t-menu v-model="modelData" theme="light" @change="handleMenuChange">
-          <t-menu-item v-for="item in modelList" :key="item.id" :value="item.id">
-            <template #icon>
-              <t-icon :name="getProviderIcon(item.id)" />
-            </template>
-            <div class="menuItemContent">
-              <span class="modelName">{{ item.name }}</span>
-            </div>
-          </t-menu-item>
-        </t-menu>
-        <div v-if="modelList.length === 0" class="emptyTip">
-          <t-icon name="server" size="32px" />
-          <p>暂无模型</p>
-          <t-button size="small" theme="primary" @click="addVendor">
-            <template #icon><t-icon name="add" /></template>
-            添加模型
-          </t-button>
+        <div style="max-height: 500px; overflow: auto">
+          <t-menu v-model="modelData" theme="light" @change="handleMenuChange">
+            <t-menu-item v-for="item in modelList" :key="item.id" :value="item.id">
+              <template #icon>
+                <t-icon :name="getProviderIcon(item.id)" />
+              </template>
+              <div class="menuItemContent">
+                <span class="modelName">{{ item.name }}</span>
+              </div>
+            </t-menu-item>
+          </t-menu>
         </div>
       </div>
       <div class="listFooter">
@@ -28,7 +22,6 @@
         </t-button>
       </div>
     </div>
-
     <div class="modelParameter">
       <div v-if="currentModel" class="parameterContent">
         <t-form ref="formRef" :data="currentModel" labelAlign="top" class="configForm">
@@ -181,11 +174,13 @@ function getProviderIcon(id: string): string {
 function handleMenuChange(value: any) {
   modelData.value = value;
 }
-function loadFromLocalStorage() {
-}
+function loadFromLocalStorage() {}
 function addVendor() {}
 const addModelShow = ref(false);
 function addModel() {
+  formData.value = {
+    modelName: "",
+  };
   addModelShow.value = true;
 }
 const formData = ref({
@@ -221,27 +216,15 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     .listContent {
-      flex: 1;
-      overflow-y: auto;
       .menuItemContent {
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex: 1;
         margin-left: 8px;
-
         .modelName {
           font-weight: 500;
         }
-      }
-      .emptyTip {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        padding: 40px 16px;
-        color: #999999;
       }
     }
 

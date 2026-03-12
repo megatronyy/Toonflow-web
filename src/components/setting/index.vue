@@ -54,7 +54,7 @@ const menuItems = [
   { key: "logoutConfig", label: "退出登录", icon: "i-logout" },
 ];
 
-const activeMenu = ref("modelServe");
+const activeMenu = ref("themeConfig");
 const currentMenuItem = computed(() => menuItems.find((item) => item.key === activeMenu.value));
 </script>
 
