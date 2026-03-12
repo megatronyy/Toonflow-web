@@ -37,13 +37,14 @@
         </a-flex>
       </template>
       <div class="data">
-        <textarea
+        <!-- <textarea
           v-model="props.item.content"
           class="notebook-textarea"
           placeholder="请输入剧本内容..."
           spellcheck="false"
           @input="handleInput"
-          :ref="setTextareaRef"></textarea>
+          :ref="setTextareaRef"></textarea> -->
+        <t-textarea v-model="props.item.content" placeholder="请输入剧本内容..." name="description" :autosize="{ minRows: 30, maxRows: 30 }" />
       </div>
     </t-dialog>
   </div>

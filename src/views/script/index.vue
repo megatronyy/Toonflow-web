@@ -137,7 +137,7 @@ async function handleDeleteScript(scriptId: number) {
         display: -webkit-box;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        color: var(--td-text-color-secondary);
+        -webkit-line-clamp: 1;
       }
     }
     .emptyState {

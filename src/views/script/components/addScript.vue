@@ -32,13 +32,18 @@
           </div>
         </div>
         <div class="content">
-          <textarea
+          <!-- <textarea
             v-model="scriptData"
             class="notebook-textarea"
             placeholder="请上传剧本内容..."
             spellcheck="false"
             @input="handleInput"
-            :ref="setTextareaRef"></textarea>
+            :ref="setTextareaRef"></textarea> -->
+          <t-textarea
+            v-model="scriptData"
+            placeholder="请上传剧本内容..."
+            name="description"
+            :autosize="{ minRows: 15, maxRows: 15 }" />
         </div>
       </div>
       <template #footer>
