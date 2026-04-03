@@ -320,7 +320,7 @@ function confirmUpdate() {
   const reinstallWarning = updateInfo.value.reinstall ? "\n\n检测到该版本需要重新安装更新，安装过程中可能会替换现有安装，请先保存当前工作。" : "";
 
   const dialog = DialogPlugin.confirm({
-    header: "确认更新",
+    header: $t("settings.about.confirmUpdate"),
     body: `将通过 ${getUpdateSourceLabel(updateSource.value)} 更新到 v${updateInfo.value.latestVersion}，确认继续吗？${reinstallWarning}`,
     confirmBtn: {
       content: t("settings.about.confirmUpdate"),
