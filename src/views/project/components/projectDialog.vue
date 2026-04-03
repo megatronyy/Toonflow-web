@@ -26,9 +26,13 @@
               <t-input v-model="formState.type" :placeholder="$t('workbench.project.dialog.novelTypePh')" />
             </t-form-item>
             <t-form-item :label="$t('workbench.project.dialog.modelData')">
-              <div class="ac" style="gap: 5px; width: 100%">
-                <modelSelect v-model="formState.imageModel" type="image" />
-                <t-select v-model="formState.imageQuality" class="paramSelect ml-5" :placeholder="$t('workbench.production.editImage.quality')">
+              <div class="ac" style="display: flex; gap: 5px; width: 100%; flex-wrap: wrap">
+                <modelSelect v-model="formState.imageModel" type="image" style="min-width: 150px; flex: 1 1 150px" />
+                <t-select
+                  v-model="formState.imageQuality"
+                  class="paramSelect ml-5"
+                  :placeholder="$t('workbench.production.editImage.quality')"
+                  style="min-width: 150px; flex: 1 1 150px">
                   <t-option value="1K" label="1K" />
                   <t-option value="2K" label="2K" />
                   <t-option value="4K" label="4K" />
@@ -36,9 +40,18 @@
               </div>
             </t-form-item>
             <t-form-item :label="$t('workbench.project.dialog.videoModelData')">
-              <div class="ac" style="gap: 5px; width: 100%">
-                <modelSelect v-model="formState.videoModel" type="video" @change="changeFn" :changeConfig="true" />
-                <t-select v-model="formState.mode" class="paramSelect ml-5" :placeholder="$t('workbench.production.editImage.mode')">
+              <div class="ac" style="display: flex; gap: 5px; width: 100%; flex-wrap: wrap">
+                <modelSelect
+                  v-model="formState.videoModel"
+                  type="video"
+                  @change="changeFn"
+                  :changeConfig="true"
+                  style="min-width: 150px; flex: 1 1 150px" />
+                <t-select
+                  v-model="formState.mode"
+                  class="paramSelect ml-5"
+                  :placeholder="$t('workbench.production.editImage.mode')"
+                  style="min-width: 150px; flex: 1 1 150px">
                   <t-option v-for="value in mode" :key="value.value" :value="value.value" :label="value.label" />
                 </t-select>
               </div>
